@@ -3,25 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DetectIA — Reconocimiento de Dígitos en Tiempo Real</title>
+  <title>DetectIA — Reconocimiento de Dígitos Manuscritos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0b0f19;
-      --surface: #151d30;
-      --surface-alt: #0a1120;
-      --surface-hover: #1e2942;
-      --border: #263554;
-      --border-focus: #3b82f6;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --success: #10b981;
-      --success-bg: rgba(16, 185, 129, 0.15);
-      --danger: #ef4444;
-      --danger-bg: rgba(239, 68, 68, 0.15);
-      --warning: #f59e0b;
-      --accent: #8b5cf6;
+      /* Marca Tea Green */
+      --tea-green: #AFC49A;
+      --forest-green: #294635;
+      --deep-leaf: #4F7256;
+      --sage-green: #829B78;
+      --light-matcha: #DDE8C8;
+
+      /* Tema claro (predeterminado) */
+      --bg: #F7F8F1;
+      --surface: #FFFFFF;
+      --surface-2: #EEF2E8;
+      --text: #1E2A21;
+      --text-2: #5E6E5F;
+      --border: #D9E2D5;
+      --focus: #567B3B;
+      --hero-gradient: linear-gradient(180deg, #F7F8F1, #E8EFDF);
+
+      --primary: #294635;
+      --primary-hover: #1E3528;
+      --primary-text: #FFFFFF;
+
+      /* Estados */
+      --success: #337652;
+      --success-bg: rgba(51, 118, 82, 0.11);
+      --warning: #976719;
+      --error: #B44743;
+      --error-bg: rgba(180, 71, 67, 0.11);
+      --info: #3F7082;
+
+      /* Lienzo */
+      --canvas-bg: #FFFFFF;
+      --canvas-ink: #1E2A21;
+      --grid-line: rgba(30, 42, 33, 0.10);
+      --shadow: 0 2px 12px rgba(30, 42, 33, 0.05);
+
+      /* Tipografía */
+      --font-heading: "Space Grotesk", system-ui, sans-serif;
+      --font-body: "Inter", system-ui, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg: #111A13;
+      --surface: #19241B;
+      --surface-2: #222F24;
+      --text: #F1F5EB;
+      --text-2: #B5C0B2;
+      --border: #334436;
+      --focus: #C2D7A3;
+      --hero-gradient: linear-gradient(180deg, #111A13, #17231A);
+
+      --primary: #C2D7A3;
+      --primary-hover: #D4E4BC;
+      --primary-text: #1E2A21;
+
+      --success-bg: rgba(194, 215, 163, 0.14);
+      --error-bg: rgba(180, 71, 67, 0.18);
+
+      --canvas-bg: #111A13;
+      --canvas-ink: #F1F5EB;
+      --grid-line: rgba(241, 245, 235, 0.10);
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
 
     * {
@@ -31,98 +79,122 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-family: var(--font-body);
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      line-height: 1.55;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .hero-band {
+      background: var(--hero-gradient);
+      border-bottom: 1px solid var(--border);
       padding: 20px 16px;
-      line-height: 1.5;
     }
 
     .container {
-      max-width: 1020px;
+      max-width: 1040px;
       margin: 0 auto;
     }
 
-    /* Encabezado */
     header {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
     }
 
     .title-group h1 {
-      font-size: 1.65rem;
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      line-height: 1.15;
+      color: var(--text);
     }
 
     .title-group p {
-      color: var(--muted);
-      font-size: 0.92rem;
+      color: var(--text-2);
+      font-size: 0.94rem;
+      margin-top: 4px;
     }
 
-    .stats-bar {
+    .header-right {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: 8px;
     }
 
     .stat-pill {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 0.82rem;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-2);
     }
 
     .stat-pill strong {
-      color: #60a5fa;
+      color: var(--text);
       font-weight: 600;
     }
 
-    /* Pestañas */
+    .theme-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface-2);
+    }
+
+    .main-wrap {
+      padding: 22px 16px 40px;
+    }
+
+    /* Navegación por pestañas */
     .nav-tabs {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
     }
 
     .tab-btn {
       background: var(--surface);
-      color: var(--muted);
+      color: var(--text-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 18px;
-      font-size: 0.95rem;
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       transition: all 0.15s ease;
     }
 
     .tab-btn:hover {
-      background: var(--surface-hover);
+      background: var(--surface-2);
       color: var(--text);
     }
 
     .tab-btn.active {
       background: var(--primary);
-      color: white;
+      color: var(--primary-text);
       border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
     .tab-content {
@@ -133,15 +205,16 @@
       display: block;
     }
 
-    /* Grilla de dos columnas */
-    .grid-two-col {
+    /* Layout de columnas */
+    .grid-draw {
       display: grid;
-      grid-template-columns: 340px 1fr;
+      grid-template-columns: 350px 1fr;
       gap: 20px;
+      align-items: start;
     }
 
-    @media (max-width: 840px) {
-      .grid-two-col {
+    @media (max-width: 860px) {
+      .grid-draw {
         grid-template-columns: 1fr;
       }
     }
@@ -151,103 +224,143 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 22px;
+      box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
-    .card-title {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
 
-    /* Lienzo de dibujo */
-    .canvas-box {
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .chip {
+      background: var(--surface-2);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Lienzo */
+    .canvas-area {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 14px;
     }
 
+    .mode-switch {
+      display: flex;
+      width: 100%;
+      max-width: 280px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .mode-opt {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-2);
+      cursor: pointer;
+    }
+
+    .mode-opt.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
     canvas#drawCanvas {
       width: 280px;
       height: 280px;
-      background: #000;
-      border: 2px solid var(--border);
+      background-color: var(--canvas-bg);
+      border: 1.5px solid var(--border);
       border-radius: 12px;
       touch-action: none;
       cursor: crosshair;
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.15s ease;
     }
 
-    canvas#drawCanvas:focus,
-    canvas#drawCanvas:hover {
-      border-color: var(--border-focus);
+    canvas#drawCanvas:hover,
+    canvas#drawCanvas:focus {
+      border-color: var(--focus);
     }
 
-    .canvas-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      width: 100%;
-      justify-content: center;
-    }
-
-    .stroke-selector {
+    .stroke-bar {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.85rem;
-      color: var(--muted);
-      background: var(--surface-alt);
-      padding: 4px 8px;
-      border-radius: 8px;
+      background: var(--surface-2);
       border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.82rem;
+      color: var(--text-2);
     }
 
     .stroke-btn {
       background: transparent;
-      border: 1px solid transparent;
-      color: var(--text);
+      border: none;
+      color: var(--text-2);
       padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
+      font-weight: 600;
       cursor: pointer;
     }
 
     .stroke-btn.active {
       background: var(--primary);
-      color: white;
-      border-color: var(--primary);
+      color: var(--primary-text);
     }
 
-    button {
-      cursor: pointer;
-      border: none;
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    button.btn {
+      flex: 1;
+      border: 1px solid transparent;
       border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 0.9rem;
+      padding: 10px 14px;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: transform 0.08s ease, background-color 0.15s ease;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.08s ease;
     }
 
-    button:active {
-      transform: scale(0.97);
+    button.btn:active {
+      transform: scale(0.98);
     }
 
     .btn-primary {
       background: var(--primary);
-      color: white;
+      color: var(--primary-text);
     }
 
     .btn-primary:hover {
@@ -255,165 +368,170 @@
     }
 
     .btn-secondary {
-      background: #263554;
+      background: var(--surface-2);
       color: var(--text);
+      border-color: var(--border) !important;
     }
 
     .btn-secondary:hover {
-      background: #33466e;
+      background: var(--border);
     }
 
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.18);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.4);
+    .btn-outline-danger {
+      background: transparent;
+      color: var(--error);
+      border-color: rgba(180, 71, 67, 0.35) !important;
     }
 
-    .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.28);
+    .btn-outline-danger:hover {
+      background: var(--error-bg);
     }
 
-    .btn-warning {
-      background: rgba(245, 158, 11, 0.18);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.4);
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      color: var(--text-2);
+      cursor: pointer;
+      user-select: none;
     }
 
-    .btn-warning:hover {
-      background: rgba(245, 158, 11, 0.28);
+    .check-label input {
+      accent-color: var(--primary);
+      width: 15px;
+      height: 15px;
     }
 
-    /* Visualizador Cuadrícula 28x28 */
-    .grid-preview-wrapper {
+    /* Panel de resultados y Cuadrícula 28x28 */
+    .result-grid {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 20px;
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    @media (max-width: 560px) {
+      .result-grid {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+    }
+
+    .prediction-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .prediction-card .lbl {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-2);
+      font-weight: 600;
+    }
+
+    .prediction-card .val {
+      font-family: var(--font-heading);
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--primary);
+      margin: 6px 0;
+    }
+
+    .prediction-card .conf {
+      display: inline-block;
+      background: var(--light-matcha);
+      color: #1E2A21;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    [data-theme="dark"] .prediction-card .conf {
+      background: var(--surface-2);
+      color: var(--tea-green);
+      border: 1px solid var(--border);
+    }
+
+    .preview-28-box {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+    }
+
+    .preview-28-box span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-2);
     }
 
     canvas#gridCanvas {
-      width: 140px;
-      height: 140px;
-      background: #000;
+      width: 196px;
+      height: 196px;
+      background-color: var(--canvas-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       image-rendering: pixelated;
     }
 
-    /* Tarjeta de resultado */
-    .prediction-display {
-      display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 16px;
-      align-items: center;
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
+    .preview-28-box small {
+      font-size: 0.74rem;
+      color: var(--text-2);
     }
 
-    @media (max-width: 520px) {
-      .prediction-display {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-    }
-
-    .big-digit-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 10px;
-      padding: 14px;
-    }
-
-    .big-digit-box .label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-      letter-spacing: 0.05em;
-    }
-
-    .big-digit-box .digit {
-      font-size: 4.5rem;
-      font-weight: 800;
-      color: #60a5fa;
-      line-height: 1;
-      margin: 4px 0;
-    }
-
-    .big-digit-box .badge {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #93c5fd;
-    }
-
-    .prediction-details {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .details-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.88rem;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
-      padding-bottom: 4px;
-    }
-
-    .details-row span:first-child {
-      color: var(--muted);
-    }
-
-    .details-row span:last-child {
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    /* Barras de distribución */
+    /* Barras de afinidad */
     .bars-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
 
     .bar-row {
       display: grid;
-      grid-template-columns: 24px 1fr 54px;
+      grid-template-columns: 24px 1fr 56px;
       align-items: center;
       gap: 10px;
-      font-size: 0.84rem;
+      font-size: 0.85rem;
     }
 
     .bar-digit {
+      font-family: var(--font-heading);
       font-weight: 700;
       text-align: center;
-      color: var(--muted);
+      color: var(--text-2);
     }
 
     .bar-digit.winner {
-      color: #60a5fa;
+      color: var(--primary);
       font-size: 1rem;
     }
 
     .bar-track {
-      height: 9px;
-      background: var(--surface-alt);
+      height: 10px;
+      background: var(--surface-2);
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid #1e293b;
+      border: 1px solid var(--border);
     }
 
     .bar-fill {
       height: 100%;
-      background: #475569;
+      background: var(--tea-green);
       border-radius: 999px;
-      transition: width 0.2s ease;
+      transition: width 0.22s ease;
     }
 
     .bar-fill.winner {
@@ -423,56 +541,63 @@
     .bar-pct {
       text-align: right;
       font-variant-numeric: tabular-nums;
-      color: var(--muted);
+      color: var(--text-2);
+      font-size: 0.82rem;
     }
 
     .bar-pct.winner {
-      color: #93c5fd;
+      color: var(--text);
       font-weight: 700;
     }
 
-    /* Pestaña Explorador */
-    .explorer-controls {
+    /* Explorador */
+    .explorer-toolbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
+      box-shadow: var(--shadow);
     }
 
     .index-form {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     input[type="number"] {
-      width: 110px;
-      padding: 8px 12px;
+      width: 104px;
+      padding: 8px 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
-      background: var(--surface);
+      background: var(--surface-2);
       color: var(--text);
-      font-size: 1rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
       font-weight: 600;
       text-align: center;
+    }
+
+    input[type="number"]:focus {
+      outline: 2px solid var(--focus);
+      border-color: transparent;
     }
 
     .comparison-boxes {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
-      margin-bottom: 14px;
     }
 
     .digit-box {
-      background: var(--surface-alt);
+      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px;
@@ -480,15 +605,17 @@
     }
 
     .digit-box .label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 4px;
+      font-size: 0.78rem;
+      color: var(--text-2);
+      font-weight: 500;
     }
 
     .digit-box .number {
+      font-family: var(--font-heading);
       font-size: 2.8rem;
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1.1;
+      margin-top: 4px;
     }
 
     .status-banner {
@@ -497,209 +624,201 @@
       align-items: center;
       padding: 10px 14px;
       border-radius: 8px;
-      margin-bottom: 16px;
       font-weight: 600;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
     }
 
     .status-banner.ok {
       background: var(--success-bg);
       color: var(--success);
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(51, 118, 82, 0.3);
     }
 
     .status-banner.err {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid rgba(180, 71, 67, 0.3);
     }
 
     .error-toast {
-      color: var(--danger);
-      font-size: 0.88rem;
-      margin-top: 6px;
+      color: var(--error);
+      font-size: 0.84rem;
+      font-weight: 500;
       display: none;
     }
 
-    .badge-info {
-      background: rgba(139, 92, 246, 0.15);
-      color: #c4b5fd;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
+    canvas#datasetCanvas {
+      width: 280px;
+      height: 280px;
+      background-color: var(--canvas-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="title-group">
-        <h1><span>🧠</span> DetectIA — Reconocimiento de Dígitos</h1>
-        <p>Visión Artificial e Inteligencia Artificial con SVM (Dataset MNIST)</p>
-      </div>
-      <div class="stats-bar">
-        <div class="stat-pill">Modelo: <strong>{{ resumen.modelo }}</strong></div>
-        <div class="stat-pill">Precisión: <strong>{{ resumen.accuracy_pct }}%</strong></div>
-        <div class="stat-pill">Muestras Test: <strong>{{ resumen.total_prueba }}</strong></div>
-        <div class="stat-pill">Tiempo Train: <strong>{{ resumen.tiempo_train }}s</strong></div>
-      </div>
-    </header>
+  <div class="hero-band">
+    <div class="container">
+      <header>
+        <div class="title-group">
+          <h1>DetectIA — Clasificador de Dígitos</h1>
+          <p>Reconocimiento de escritura manuscrita en malla de 28 × 28 píxeles mediante SVM</p>
+        </div>
+        <div class="header-right">
+          <div class="stat-pill">Modelo: <strong>{{ resumen.modelo }}</strong></div>
+          <div class="stat-pill">Precisión test: <strong>{{ resumen.accuracy_pct }}%</strong></div>
+          <div class="stat-pill">Muestras: <strong>{{ resumen.total_prueba }}</strong></div>
+          <button type="button" class="theme-toggle" id="btnTheme" title="Cambiar tema claro/oscuro">
+            Tema oscuro
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>
 
-    <!-- Barra de navegación de pestañas -->
+  <div class="container main-wrap">
     <nav class="nav-tabs">
-      <button class="tab-btn active" id="tabBtnDraw" onclick="cambiarPestana('draw')">
-        ✍️ Dibujar en Vivo (Lienzo Táctil)
+      <button type="button" class="tab-btn active" id="tabBtnDraw" onclick="cambiarPestana('draw')">
+        Dibujar en vivo
       </button>
-      <button class="tab-btn" id="tabBtnExplorer" onclick="cambiarPestana('explorer')">
-        🔍 Explorador de Dataset (10.500 muestras)
+      <button type="button" class="tab-btn" id="tabBtnExplorer" onclick="cambiarPestana('explorer')">
+        Explorador de muestras ({{ resumen.total_prueba }})
       </button>
     </nav>
 
-    <!-- ===================================================================== -->
-    <!-- PESTAÑA 1: DIBUJO EN VIVO (Lienzo Táctil + Cuadrícula 28x28 en Vivo) -->
-    <!-- ===================================================================== -->
+    <!-- PESTAÑA 1: DIBUJO EN VIVO -->
     <main class="tab-content active" id="viewDraw">
-      <div class="grid-two-col">
-        <!-- Columna Izquierda: Lienzo de Dibujo -->
+      <div class="grid-draw">
         <section class="card">
-          <div class="card-title">
-            <span>Dibuja un número (0 al 9)</span>
-            <span class="badge-info">Táctil / Mouse</span>
+          <div class="card-header">
+            <h2 class="card-title">Lienzo de entrada</h2>
+            <span class="chip">Táctil / Mouse</span>
           </div>
 
-          <div class="canvas-box">
+          <div class="canvas-area">
+            <div class="mode-switch">
+              <button type="button" class="mode-opt active" id="modeLibre" onclick="setModoDibujo('libre')">Trazo libre</button>
+              <button type="button" class="mode-opt" id="modeGrid" onclick="setModoDibujo('grid')">Cuadrícula 28×28</button>
+            </div>
+
             <canvas id="drawCanvas" width="280" height="280"></canvas>
 
-            <div class="canvas-controls">
-              <div class="stroke-selector">
-                <span>Grosor:</span>
-                <button type="button" class="stroke-btn" onclick="setGrosor(14, this)">Fino</button>
-                <button type="button" class="stroke-btn active" onclick="setGrosor(22, this)">Medio</button>
-                <button type="button" class="stroke-btn" onclick="setGrosor(30, this)">Grueso</button>
-              </div>
+            <div class="stroke-bar" id="strokeBar">
+              <span>Grosor:</span>
+              <button type="button" class="stroke-btn" onclick="setGrosor(16, this)">Fino</button>
+              <button type="button" class="stroke-btn active" onclick="setGrosor(22, this)">Medio</button>
+              <button type="button" class="stroke-btn" onclick="setGrosor(28, this)">Grueso</button>
             </div>
 
-            <div class="canvas-controls">
-              <button type="button" class="btn-danger" id="btnClearDraw">
-                🗑️ Limpiar
-              </button>
-              <button type="button" class="btn-primary" id="btnPredictDraw">
-                ⚡ Reconocer Dígito
-              </button>
+            <div class="btn-row">
+              <button type="button" class="btn btn-outline-danger" id="btnClearDraw">Limpiar</button>
+              <button type="button" class="btn btn-primary" id="btnPredictDraw">Reconocer</button>
             </div>
 
-            <label style="font-size: 0.84rem; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <label class="check-label">
               <input type="checkbox" id="chkAutoPredict" checked />
-              Reconocer automáticamente al levantar el dedo/mouse
+              Predecir automáticamente al finalizar el trazo
             </label>
             <div class="error-toast" id="drawErrorMsg"></div>
           </div>
         </section>
 
-        <!-- Columna Derecha: Predicción y Cuadrícula 28x28 -->
         <section class="card">
-          <div class="card-title">
-            <span>Resultado de la IA</span>
-            <span id="drawLatencyBadge" style="font-size: 0.8rem; color: var(--muted);">Listo</span>
+          <div class="card-header">
+            <h2 class="card-title">Resultado e Inspección 28 × 28</h2>
+            <span class="chip" id="drawLatencyBadge">Listo</span>
           </div>
 
-          <!-- Cuadro de Predicción -->
-          <div class="prediction-display">
-            <div class="big-digit-box">
-              <span class="label">Predicción</span>
-              <span class="digit" id="drawPredictedDigit">-</span>
-              <span class="badge" id="drawConfidenceBadge">Dibuja algo</span>
+          <div class="result-grid">
+            <div class="prediction-card">
+              <div class="lbl">Dígito predicho</div>
+              <div class="val" id="drawPredictedDigit">—</div>
+              <div class="conf" id="drawConfidenceBadge">Esperando trazo</div>
             </div>
 
-            <!-- Mini visualizador de la cuadrícula 28x28 -->
-            <div class="grid-preview-wrapper">
-              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 600;">
-                Cómo lo ve la IA (28 × 28 px)
-              </span>
-              <canvas id="gridCanvas" width="28" height="28"></canvas>
-              <span style="font-size: 0.74rem; color: var(--muted);">
-                Centrado por Centro de Masa
-              </span>
+            <div class="preview-28-box">
+              <span>Entrada normalizada (28 × 28 px)</span>
+              <canvas id="gridCanvas" width="280" height="280"></canvas>
+              <small>Centrado por centro de masa MNIST</small>
             </div>
           </div>
 
-          <!-- Distribución de Probabilidades (0 al 9) -->
-          <div class="card-title" style="margin-top: 4px;">
-            <span>Afinidad por Dígito (0 al 9)</span>
+          <div>
+            <div class="card-header" style="margin-bottom: 10px;">
+              <h3 class="card-title" style="font-size: 0.92rem;">Afinidad por clase (0 al 9)</h3>
+            </div>
+            <div class="bars-list" id="drawBarsContainer"></div>
           </div>
-          <div class="bars-list" id="drawBarsContainer"></div>
         </section>
       </div>
     </main>
 
-    <!-- ===================================================================== -->
-    <!-- PESTAÑA 2: EXPLORADOR DE MUESTRAS DEL DATASET (0 a 10499)            -->
-    <!-- ===================================================================== -->
+    <!-- PESTAÑA 2: EXPLORADOR DEL DATASET -->
     <main class="tab-content" id="viewExplorer">
-      <section class="explorer-controls">
+      <section class="explorer-toolbar">
         <form class="index-form" id="formIndice">
-          <label for="inputIndice" style="font-size: 0.88rem; color: var(--muted);">Índice (0 – {{ resumen.total_prueba - 1 }}):</label>
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <button type="button" class="btn-secondary" id="btnPrev" title="Anterior">◀</button>
-            <input type="number" id="inputIndice" min="0" max="{{ resumen.total_prueba - 1 }}" value="1100" required />
-            <button type="button" class="btn-secondary" id="btnNext" title="Siguiente">▶</button>
-          </div>
-          <button type="submit" class="btn-primary">Consultar</button>
+          <label for="inputIndice" style="font-size: 0.86rem; color: var(--text-2); font-weight: 500;">
+            Índice (0 – {{ resumen.total_prueba - 1 }}):
+          </label>
+          <button type="button" class="btn btn-secondary" style="flex: 0; padding: 8px 12px;" id="btnPrev">◀</button>
+          <input type="number" id="inputIndice" min="0" max="{{ resumen.total_prueba - 1 }}" value="1100" required />
+          <button type="button" class="btn btn-secondary" style="flex: 0; padding: 8px 12px;" id="btnNext">▶</button>
+          <button type="submit" class="btn btn-primary" style="flex: 0; padding: 8px 14px;">Consultar</button>
           <span class="error-toast" id="explorerErrorMsg"></span>
         </form>
 
         <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn-secondary" id="btnAleatorio">🎲 Aleatoria</button>
-          <button type="button" class="btn-warning" id="btnSiguienteError">⚠️ Siguiente Error</button>
+          <button type="button" class="btn btn-secondary" style="flex: 0;" id="btnAleatorio">Muestra aleatoria</button>
+          <button type="button" class="btn btn-secondary" style="flex: 0; color: var(--warning);" id="btnSiguienteError">Siguiente error</button>
         </div>
       </section>
 
-      <div class="grid-two-col">
-        <!-- Columna Izquierda: Imagen de Muestra -->
+      <div class="grid-draw">
         <section class="card">
-          <div class="card-title">
-            <span>Muestra #<span id="lblIndiceActual">1100</span></span>
-            <span class="badge-info">Dataset MNIST</span>
+          <div class="card-header">
+            <h2 class="card-title">Muestra #<span id="lblIndiceActual">1100</span></h2>
+            <span class="chip">MNIST Test</span>
           </div>
 
-          <div class="canvas-box">
-            <canvas id="datasetCanvas" width="280" height="280" style="background: #000; border-radius: 8px; border: 1px solid var(--border); image-rendering: pixelated;"></canvas>
-            <div style="display: flex; gap: 14px; font-size: 0.82rem; color: var(--muted);">
-              <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+          <div class="canvas-area">
+            <canvas id="datasetCanvas" width="280" height="280"></canvas>
+            <div style="display: flex; gap: 16px;">
+              <label class="check-label">
                 <input type="checkbox" id="chkCuadricula" checked />
-                Cuadrícula 28×28
-              </label>
-              <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <input type="checkbox" id="chkInvertir" />
-                Invertir tinta
+                Ver cuadrícula 28×28
               </label>
             </div>
           </div>
         </section>
 
-        <!-- Columna Derecha: Resultado sobre la Muestra -->
         <section class="card">
-          <div class="card-title">Evaluación del Modelo</div>
+          <div class="card-header">
+            <h2 class="card-title">Evaluación del modelo</h2>
+          </div>
 
           <div class="comparison-boxes">
             <div class="digit-box">
-              <div class="label">Valor Real</div>
-              <div class="number" id="valReal">-</div>
+              <div class="label">Valor real</div>
+              <div class="number" id="valReal">—</div>
             </div>
             <div class="digit-box">
               <div class="label">Predicción SVM</div>
-              <div class="number" id="valPred">-</div>
+              <div class="number" id="valPred">—</div>
             </div>
           </div>
 
           <div class="status-banner ok" id="statusBanner">
-            <span id="statusText">Cargando muestra...</span>
-            <span id="latencyText" style="font-size: 0.82rem;"></span>
+            <span id="statusText">Cargando...</span>
+            <span id="latencyText" style="font-size: 0.8rem;"></span>
           </div>
 
-          <div class="card-title">Afinidad por Dígito</div>
-          <div class="bars-list" id="explorerBarsContainer"></div>
+          <div>
+            <div class="card-header" style="margin-bottom: 10px;">
+              <h3 class="card-title" style="font-size: 0.92rem;">Afinidad por clase</h3>
+            </div>
+            <div class="bars-list" id="explorerBarsContainer"></div>
+          </div>
         </section>
       </div>
     </main>
@@ -708,37 +827,71 @@
   <script>
     const TOTAL_MUESTRAS = {{ resumen.total_prueba }};
     let grosorTrazo = 22;
+    let modoDibujo = "libre"; // 'libre' o 'grid'
     let haDibujado = false;
+    let gridManual = new Uint8Array(784);
+    let ultimosPixelesProcesados = null;
+    let ultimosPixelesExplorer = [];
 
-    // --- Control de Pestañas ---
-    function cambiarPestana(p) {
-      document.getElementById("tabBtnDraw").classList.toggle("active", p === 'draw');
-      document.getElementById("tabBtnExplorer").classList.toggle("active", p === 'explorer');
-      document.getElementById("viewDraw").classList.toggle("active", p === 'draw');
-      document.getElementById("viewExplorer").classList.toggle("active", p === 'explorer');
+    // --- Tema Claro / Oscuro (Tea Green) ---
+    const btnTheme = document.getElementById("btnTheme");
+    function aplicarTema(oscuro) {
+      document.documentElement.setAttribute("data-theme", oscuro ? "dark" : "light");
+      btnTheme.textContent = oscuro ? "Tema claro" : "Tema oscuro";
+      localStorage.setItem("detectia-theme", oscuro ? "dark" : "light");
+      // Redibujar vistas con la tinta del tema actual
+      if (modoDibujo === "grid") {
+        dibujarGridManualEnCanvas();
+      } else {
+        recolorearTrazoLibre();
+      }
+      if (ultimosPixelesProcesados) renderizarGridCanvas(ultimosPixelesProcesados);
+      if (ultimosPixelesExplorer.length) renderizarMuestraExplorer(ultimosPixelesExplorer);
     }
 
-    // --- Lienzo de Dibujo Táctil ---
+    btnTheme.addEventListener("click", () => {
+      const esOscuro = document.documentElement.getAttribute("data-theme") === "dark";
+      aplicarTema(!esOscuro);
+    });
+
+    function getInkColor() {
+      return getComputedStyle(document.documentElement).getPropertyValue("--canvas-ink").trim() || "#1E2A21";
+    }
+
+    function getGridLineColor() {
+      return getComputedStyle(document.documentElement).getPropertyValue("--grid-line").trim() || "rgba(30,42,33,0.1)";
+    }
+
+    // --- Pestañas ---
+    function cambiarPestana(p) {
+      document.getElementById("tabBtnDraw").classList.toggle("active", p === "draw");
+      document.getElementById("tabBtnExplorer").classList.toggle("active", p === "explorer");
+      document.getElementById("viewDraw").classList.toggle("active", p === "draw");
+      document.getElementById("viewExplorer").classList.toggle("active", p === "explorer");
+    }
+
+    // --- Lienzo de Dibujo ---
     const drawCanvas = document.getElementById("drawCanvas");
-    const drawCtx = drawCanvas.getContext("2d");
+    const drawCtx = drawCanvas.getContext("2d", { willReadFrequently: true });
     const gridCanvas = document.getElementById("gridCanvas");
     const gridCtx = gridCanvas.getContext("2d");
+
+    // Capa oculta que guarda exclusivamente la tinta pura (fondo transparente)
+    const inkCanvas = document.createElement("canvas");
+    inkCanvas.width = 280;
+    inkCanvas.height = 280;
+    const inkCtx = inkCanvas.getContext("2d", { willReadFrequently: true });
 
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
 
-    function limpiarLienzo() {
-      drawCtx.fillStyle = "#000000";
-      drawCtx.fillRect(0, 0, 280, 280);
-      gridCtx.fillStyle = "#000000";
-      gridCtx.fillRect(0, 0, 28, 28);
-      haDibujado = false;
-      document.getElementById("drawPredictedDigit").textContent = "-";
-      document.getElementById("drawConfidenceBadge").textContent = "Dibuja algo";
-      document.getElementById("drawLatencyBadge").textContent = "Listo";
-      document.getElementById("drawErrorMsg").style.display = "none";
-      renderizarBarras("drawBarsContainer", [0,0,0,0,0,0,0,0,0,0], -1);
+    function setModoDibujo(nuevoModo) {
+      modoDibujo = nuevoModo;
+      document.getElementById("modeLibre").classList.toggle("active", nuevoModo === "libre");
+      document.getElementById("modeGrid").classList.toggle("active", nuevoModo === "grid");
+      document.getElementById("strokeBar").style.display = nuevoModo === "libre" ? "flex" : "none";
+      limpiarLienzo();
     }
 
     function setGrosor(val, btn) {
@@ -747,16 +900,108 @@
       btn.classList.add("active");
     }
 
+    function limpiarLienzo() {
+      inkCtx.clearRect(0, 0, 280, 280);
+      drawCtx.clearRect(0, 0, 280, 280);
+      gridManual.fill(0);
+      ultimosPixelesProcesados = null;
+      haDibujado = false;
+
+      if (modoDibujo === "grid") {
+        dibujarGridManualEnCanvas();
+      }
+      limpiarGridCanvas();
+
+      document.getElementById("drawPredictedDigit").textContent = "—";
+      document.getElementById("drawConfidenceBadge").textContent = "Esperando trazo";
+      document.getElementById("drawLatencyBadge").textContent = "Listo";
+      document.getElementById("drawErrorMsg").style.display = "none";
+      renderizarBarras("drawBarsContainer", [0,0,0,0,0,0,0,0,0,0], -1);
+    }
+
+    function limpiarGridCanvas() {
+      gridCtx.clearRect(0, 0, 280, 280);
+      dibujarLineasCuadricula(gridCtx, 280, 28);
+    }
+
+    function dibujarLineasCuadricula(ctx, size, cells) {
+      const step = size / cells;
+      ctx.strokeStyle = getGridLineColor();
+      ctx.lineWidth = 0.6;
+      for (let i = 1; i < cells; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * step, 0);
+        ctx.lineTo(i * step, size);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, i * step);
+        ctx.lineTo(size, i * step);
+        ctx.stroke();
+      }
+    }
+
+    function recolorearTrazoLibre() {
+      const imgData = inkCtx.getImageData(0, 0, 280, 280);
+      const data = imgData.data;
+      const colorHex = getInkColor();
+      const r = parseInt(colorHex.slice(1, 3), 16);
+      const g = parseInt(colorHex.slice(3, 5), 16);
+      const b = parseInt(colorHex.slice(5, 7), 16);
+
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] > 0) {
+          data[i] = r;
+          data[i + 1] = g;
+          data[i + 2] = b;
+        }
+      }
+      drawCtx.putImageData(imgData, 0, 0);
+    }
+
+    function dibujarGridManualEnCanvas() {
+      drawCtx.clearRect(0, 0, 280, 280);
+      const colorHex = getInkColor();
+      const r = parseInt(colorHex.slice(1, 3), 16);
+      const g = parseInt(colorHex.slice(3, 5), 16);
+      const b = parseInt(colorHex.slice(5, 7), 16);
+
+      for (let fila = 0; fila < 28; fila++) {
+        for (let col = 0; col < 28; col++) {
+          const val = gridManual[fila * 28 + col];
+          if (val > 0) {
+            drawCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${val / 255})`;
+            drawCtx.fillRect(col * 10, fila * 10, 10, 10);
+          }
+        }
+      }
+      dibujarLineasCuadricula(drawCtx, 280, 28);
+    }
+
+    function pintarCeldaGrid(x, y) {
+      const col = Math.floor(x / 10);
+      const fila = Math.floor(y / 10);
+      if (col < 0 || col >= 28 || fila < 0 || fila >= 28) return;
+
+      // Pintar centro al 100% y suavizado ligero en vecinos directos (estilo MNIST)
+      const setMax = (f, c, v) => {
+        if (f >= 0 && f < 28 && c >= 0 && c < 28) {
+          const idx = f * 28 + c;
+          if (v > gridManual[idx]) gridManual[idx] = v;
+        }
+      };
+      setMax(fila, col, 255);
+      setMax(fila - 1, col, 160);
+      setMax(fila + 1, col, 160);
+      setMax(fila, col - 1, 160);
+      setMax(fila, col + 1, 160);
+      dibujarGridManualEnCanvas();
+    }
+
     function getCoords(e) {
       const rect = drawCanvas.getBoundingClientRect();
       const scaleX = drawCanvas.width / rect.width;
       const scaleY = drawCanvas.height / rect.height;
-      if (e.touches && e.touches.length > 0) {
-        return {
-          x: (e.touches[0].clientX - rect.left) * scaleX,
-          y: (e.touches[0].clientY - rect.top) * scaleY
-        };
-      }
       return {
         x: (e.clientX - rect.left) * scaleX,
         y: (e.clientY - rect.top) * scaleY
@@ -769,32 +1014,48 @@
       const coords = getCoords(e);
       lastX = coords.x;
       lastY = coords.y;
-      trazarPunto(coords.x, coords.y);
       haDibujado = true;
+
+      if (modoDibujo === "grid") {
+        pintarCeldaGrid(coords.x, coords.y);
+      } else {
+        const ink = getInkColor();
+        [inkCtx, drawCtx].forEach(ctx => {
+          ctx.fillStyle = ink;
+          ctx.beginPath();
+          ctx.arc(coords.x, coords.y, grosorTrazo / 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
     }
 
     function moverTrazo(e) {
       if (!isDrawing) return;
       e.preventDefault();
       const coords = getCoords(e);
-      
-      drawCtx.strokeStyle = "#ffffff";
-      drawCtx.fillStyle = "#ffffff";
-      drawCtx.lineWidth = grosorTrazo;
-      drawCtx.lineCap = "round";
-      drawCtx.lineJoin = "round";
+      haDibujado = true;
 
-      drawCtx.beginPath();
-      drawCtx.moveTo(lastX, lastY);
-      drawCtx.lineTo(coords.x, coords.y);
-      drawCtx.stroke();
+      if (modoDibujo === "grid") {
+        pintarCeldaGrid(coords.x, coords.y);
+      } else {
+        const ink = getInkColor();
+        [inkCtx, drawCtx].forEach(ctx => {
+          ctx.strokeStyle = ink;
+          ctx.lineWidth = grosorTrazo;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.beginPath();
+          ctx.moveTo(lastX, lastY);
+          ctx.lineTo(coords.x, coords.y);
+          ctx.stroke();
+        });
+      }
 
       lastX = coords.x;
       lastY = coords.y;
-      haDibujado = true;
     }
 
-    function finalizarTrazo(e) {
+    function finalizarTrazo() {
       if (!isDrawing) return;
       isDrawing = false;
       if (document.getElementById("chkAutoPredict").checked && haDibujado) {
@@ -802,61 +1063,43 @@
       }
     }
 
-    function trazarPunto(x, y) {
-      drawCtx.fillStyle = "#ffffff";
-      drawCtx.beginPath();
-      drawCtx.arc(x, y, grosorTrazo / 2, 0, Math.PI * 2);
-      drawCtx.fill();
-    }
-
-    // Eventos mouse y touch unificados
     drawCanvas.addEventListener("pointerdown", iniciarTrazo);
     drawCanvas.addEventListener("pointermove", moverTrazo);
     window.addEventListener("pointerup", finalizarTrazo);
+    window.addEventListener("pointercancel", finalizarTrazo);
 
     document.getElementById("btnClearDraw").addEventListener("click", limpiarLienzo);
-    document.getElementById("btnPredictDraw").addEventListener("click", () => {
-      enviarPrediccionDibujo();
-    });
-
-    // Extrae los 784 píxeles del canvas 280x280 bajándolos a 28x28
-    function extraerPixeles28x28() {
-      // Usamos un canvas virtual 28x28 para promediar la imagen
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 28;
-      tempCanvas.height = 28;
-      const tempCtx = tempCanvas.getContext("2d");
-      
-      // Dibujar escalado con suavizado
-      tempCtx.drawImage(drawCanvas, 0, 0, 28, 28);
-      const imgData = tempCtx.getImageData(0, 0, 28, 28);
-      const pixeles = [];
-
-      for (let i = 0; i < imgData.data.length; i += 4) {
-        // En blanco y negro, tomamos el canal rojo o verde (escala de grises)
-        pixeles.push(imgData.data[i]);
-      }
-      return pixeles;
-    }
+    document.getElementById("btnPredictDraw").addEventListener("click", enviarPrediccionDibujo);
 
     async function enviarPrediccionDibujo() {
       const errorDiv = document.getElementById("drawErrorMsg");
       errorDiv.style.display = "none";
 
-      const pixeles = extraerPixeles28x28();
-      const suma = pixeles.reduce((a, b) => a + b, 0);
-
-      if (suma === 0) {
-        errorDiv.textContent = "El lienzo está en blanco. Dibuja un dígito con el dedo o mouse.";
+      if (!haDibujado) {
+        errorDiv.textContent = "El lienzo está vacío. Dibuja un dígito antes de reconocer.";
         errorDiv.style.display = "block";
         return;
+      }
+
+      let payload;
+      if (modoDibujo === "grid") {
+        const suma = gridManual.reduce((a, b) => a + b, 0);
+        if (suma === 0) {
+          errorDiv.textContent = "La cuadrícula está vacía. Dibuja un número.";
+          errorDiv.style.display = "block";
+          return;
+        }
+        payload = { pixeles: Array.from(gridManual), ya_centrado: false };
+      } else {
+        // Enviamos la imagen HD (280x280) en base64 con fondo transparente para máxima precisión
+        payload = { imagen_base64: inkCanvas.toDataURL("image/png") };
       }
 
       try {
         const res = await fetch("/api/predecir-dibujo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pixeles: pixeles })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
 
@@ -866,35 +1109,37 @@
           return;
         }
 
-        // Actualizar UI de Dibujo
         document.getElementById("drawPredictedDigit").textContent = data.prediccion;
         document.getElementById("drawConfidenceBadge").textContent = `${data.confianza}% de afinidad`;
-        document.getElementById("drawLatencyBadge").textContent = `Inferencia: ${data.latencia_ms} ms`;
+        document.getElementById("drawLatencyBadge").textContent = `${data.latencia_ms} ms`;
 
-        // Renderizar la cuadrícula 28x28 procesada
+        ultimosPixelesProcesados = data.pixeles_procesados;
         renderizarGridCanvas(data.pixeles_procesados);
-
-        // Renderizar barras de probabilidad
         renderizarBarras("drawBarsContainer", data.puntajes, data.prediccion);
-
       } catch (err) {
-        errorDiv.textContent = "Error conectando con el servidor.";
+        errorDiv.textContent = "Error conectando con el servidor Flask.";
         errorDiv.style.display = "block";
       }
     }
 
     function renderizarGridCanvas(pixeles) {
       if (!pixeles || pixeles.length !== 784) return;
-      const imgData = gridCtx.createImageData(28, 28);
-      for (let i = 0; i < 784; i++) {
-        const val = pixeles[i];
-        const idx = i * 4;
-        imgData.data[idx] = val;     // R
-        imgData.data[idx + 1] = val; // G
-        imgData.data[idx + 2] = val; // B
-        imgData.data[idx + 3] = 255; // Alpha
+      gridCtx.clearRect(0, 0, 280, 280);
+      const colorHex = getInkColor();
+      const r = parseInt(colorHex.slice(1, 3), 16);
+      const g = parseInt(colorHex.slice(3, 5), 16);
+      const b = parseInt(colorHex.slice(5, 7), 16);
+
+      for (let fila = 0; fila < 28; fila++) {
+        for (let col = 0; col < 28; col++) {
+          const val = pixeles[fila * 28 + col];
+          if (val > 0) {
+            gridCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${val / 255})`;
+            gridCtx.fillRect(col * 10, fila * 10, 10, 10);
+          }
+        }
       }
-      gridCtx.putImageData(imgData, 0, 0);
+      dibujarLineasCuadricula(gridCtx, 280, 28);
     }
 
     function renderizarBarras(containerId, puntajes, ganador) {
@@ -916,49 +1161,35 @@
       });
     }
 
-    // --- Pestaña Explorador de Dataset ---
+    // --- Explorador de Dataset ---
     const datasetCanvas = document.getElementById("datasetCanvas");
     const datasetCtx = datasetCanvas.getContext("2d");
     const inputIndice = document.getElementById("inputIndice");
     const explorerErrorMsg = document.getElementById("explorerErrorMsg");
     const chkCuadricula = document.getElementById("chkCuadricula");
-    const chkInvertir = document.getElementById("chkInvertir");
-
-    let ultimosPixelesExplorer = [];
 
     function renderizarMuestraExplorer(pixeles) {
       if (!pixeles || pixeles.length !== 784) return;
       ultimosPixelesExplorer = pixeles;
 
-      const invertir = chkInvertir.checked;
-      const verGrid = chkCuadricula.checked;
-      const cellSize = 10;
-
       datasetCtx.clearRect(0, 0, 280, 280);
+      const colorHex = getInkColor();
+      const r = parseInt(colorHex.slice(1, 3), 16);
+      const g = parseInt(colorHex.slice(3, 5), 16);
+      const b = parseInt(colorHex.slice(5, 7), 16);
 
       for (let fila = 0; fila < 28; fila++) {
         for (let col = 0; col < 28; col++) {
-          const raw = pixeles[fila * 28 + col];
-          const val = invertir ? 255 - raw : raw;
-          datasetCtx.fillStyle = `rgb(${val}, ${val}, ${val})`;
-          datasetCtx.fillRect(col * cellSize, fila * cellSize, cellSize, cellSize);
+          const val = pixeles[fila * 28 + col];
+          if (val > 0) {
+            datasetCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${val / 255})`;
+            datasetCtx.fillRect(col * 10, fila * 10, 10, 10);
+          }
         }
       }
 
-      if (verGrid) {
-        datasetCtx.strokeStyle = invertir ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)";
-        datasetCtx.lineWidth = 0.5;
-        for (let i = 1; i < 28; i++) {
-          datasetCtx.beginPath();
-          datasetCtx.moveTo(i * cellSize, 0);
-          datasetCtx.lineTo(i * cellSize, 280);
-          datasetCtx.stroke();
-
-          datasetCtx.beginPath();
-          datasetCtx.moveTo(0, i * cellSize);
-          datasetCtx.lineTo(280, i * cellSize);
-          datasetCtx.stroke();
-        }
+      if (chkCuadricula.checked) {
+        dibujarLineasCuadricula(datasetCtx, 280, 28);
       }
     }
 
@@ -984,16 +1215,15 @@
 
         if (data.acierto) {
           banner.className = "status-banner ok";
-          statusText.textContent = "✅ ACIERTO — Clasificación correcta";
+          statusText.textContent = "Acierto — Clasificación correcta";
         } else {
           banner.className = "status-banner err";
-          statusText.textContent = `❌ ERROR — Esperaba un ${data.valor_real} pero predijo ${data.prediccion}`;
+          statusText.textContent = `Error — Valor real ${data.valor_real}, predicho ${data.prediccion}`;
         }
-        latencyText.textContent = `Inferencia: ${data.latencia_ms} ms`;
+        latencyText.textContent = `${data.latencia_ms} ms`;
 
         renderizarMuestraExplorer(data.pixeles);
         renderizarBarras("explorerBarsContainer", data.puntajes, data.prediccion);
-
       } catch (err) {
         explorerErrorMsg.textContent = "Error de conexión con el servidor.";
         explorerErrorMsg.style.display = "inline";
@@ -1035,9 +1265,10 @@
     });
 
     chkCuadricula.addEventListener("change", () => renderizarMuestraExplorer(ultimosPixelesExplorer));
-    chkInvertir.addEventListener("change", () => renderizarMuestraExplorer(ultimosPixelesExplorer));
 
-    // Inicialización al cargar la página
+    // Inicializar tema guardado y vistas
+    const temaGuardado = localStorage.getItem("detectia-theme") === "dark";
+    aplicarTema(temaGuardado);
     limpiarLienzo();
     cargarMuestraExplorer(1100);
   </script>

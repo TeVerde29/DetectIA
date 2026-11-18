@@ -4,6 +4,8 @@
 # y comprobar la predicción del modelo entrenado en tiempo real.
 # ==============================================================================
 
+import base64
+import io
 import json
 import os
 import random
@@ -13,6 +15,7 @@ import joblib
 import numpy as np
 from PIL import Image
 from flask import Flask, jsonify, render_template, request
+from scipy.ndimage import center_of_mass, shift
 
 app = Flask(__name__)
 
@@ -41,14 +44,15 @@ def buscar_archivo(nombre):
     return None
 
 
-def preprocesar_matriz_mnist(pixeles_28x28):
+def preprocesar_imagen_mnist(matriz_gris):
     """
-    Aplica el preprocesamiento oficial de MNIST a una matriz 28x28:
-    1. Recorte a la caja delimitadora (Bounding Box) del trazo.
-    2. Escalado proporcional preservando aspecto dentro de 20x20 px.
-    3. Centrado dentro de 28x28 según su Centro de Masa (Center of Mass).
+    Aplica el preprocesamiento oficial de MNIST sobre una imagen de cualquier resolución (ej. 280x280 o 28x28):
+    1. Recorte a la caja delimitadora (Bounding Box) exacta del trazo.
+    2. Escalado proporcional con filtro Lanczos preservando aspecto dentro de 20x20 px.
+    3. Normalización de contraste para igualar el brillo máximo de MNIST (255).
+    4. Centrado subpíxel en 28x28 según su Centro de Masa (Center of Mass).
     """
-    img = Image.fromarray(pixeles_28x28)
+    img = Image.fromarray(matriz_gris.astype(np.uint8), mode="L")
     bbox = img.getbbox()
     if not bbox:
         return np.zeros((28, 28), dtype=np.uint8)
@@ -63,7 +67,7 @@ def preprocesar_matriz_mnist(pixeles_28x28):
         nuevo_h = 20
         nuevo_w = max(1, int(round((w * 20.0) / h)))
 
-    recorte_escalado = recorte.resize((nuevo_w, nuevo_h), Image.Resampling.BILINEAR)
+    recorte_escalado = recorte.resize((nuevo_w, nuevo_h), Image.Resampling.LANCZOS)
 
     canvas = Image.new("L", (28, 28), 0)
     pos_x = (28 - nuevo_w) // 2
@@ -71,23 +75,17 @@ def preprocesar_matriz_mnist(pixeles_28x28):
     canvas.paste(recorte_escalado, (pos_x, pos_y))
     matriz = np.array(canvas, dtype=np.float32)
 
-    total_masa = np.sum(matriz)
-    if total_masa > 0:
-        cy = np.sum(matriz * np.arange(28)[:, None]) / total_masa
-        cx = np.sum(matriz * np.arange(28)[None, :]) / total_masa
-        desp_x = int(round(14.0 - cx))
-        desp_y = int(round(14.0 - cy))
-        if desp_x != 0 or desp_y != 0:
-            matriz_trasladada = np.roll(matriz, shift=(desp_y, desp_x), axis=(0, 1))
-            if desp_y > 0:
-                matriz_trasladada[:desp_y, :] = 0
-            elif desp_y < 0:
-                matriz_trasladada[desp_y:, :] = 0
-            if desp_x > 0:
-                matriz_trasladada[:, :desp_x] = 0
-            elif desp_x < 0:
-                matriz_trasladada[:, desp_x:] = 0
-            matriz = matriz_trasladada
+    # Estirar contraste para que el trazo alcance intensidad plena (0-255)
+    max_val = np.max(matriz)
+    if max_val > 0:
+        matriz = (matriz / max_val) * 255.0
+
+    # Centrado subpíxel por Centro de Masa (estándar MNIST)
+    if np.sum(matriz) > 0:
+        cy, cx = center_of_mass(matriz)
+        desp_y = 13.5 - cy
+        desp_x = 13.5 - cx
+        matriz = shift(matriz, [desp_y, desp_x], order=1, mode="constant", cval=0.0)
 
     return np.clip(matriz, 0, 255).astype(np.uint8)
 
@@ -116,9 +114,9 @@ def cargar_artefactos():
             metricas = json.load(f)
 
 
-def softmax(valores):
-    """Convierte puntajes de decisión en porcentajes relativos para visualización."""
-    exp_v = np.exp(valores - np.max(valores))
+def softmax(valores, escala=2.5):
+    """Convierte puntajes de decisión OvR en porcentajes calibrados para visualización."""
+    exp_v = np.exp((valores - np.max(valores)) * escala)
     return (exp_v / exp_v.sum()) * 100.0
 
 
@@ -193,18 +191,31 @@ def siguiente_error():
 @app.route("/api/predecir-dibujo", methods=["POST"])
 def predecir_dibujo():
     datos = request.get_json(silent=True) or {}
+    imagen_b64 = datos.get("imagen_base64")
     pixeles_raw = datos.get("pixeles")
+    ya_centrado = bool(datos.get("ya_centrado", False))
 
-    if not pixeles_raw or len(pixeles_raw) != 784:
-        return jsonify({"error": "Se requiere una matriz de 784 píxeles."}), 400
-
-    matriz_in = np.array(pixeles_raw, dtype=np.uint8).reshape(28, 28)
+    if imagen_b64:
+        # Decodifica la imagen HD (280x280) enviada desde el lienzo
+        if "," in imagen_b64:
+            imagen_b64 = imagen_b64.split(",", 1)[1]
+        img_bytes = base64.b64decode(imagen_b64)
+        img_pil = Image.open(io.BytesIO(img_bytes))
+        if img_pil.mode == "RGBA":
+            # El trazo se dibuja sobre fondo transparente; usamos el canal alfa como intensidad
+            matriz_in = np.array(img_pil.split()[3], dtype=np.uint8)
+        else:
+            matriz_in = np.array(img_pil.convert("L"), dtype=np.uint8)
+    elif pixeles_raw and len(pixeles_raw) == 784:
+        matriz_in = np.array(pixeles_raw, dtype=np.uint8).reshape(28, 28)
+    else:
+        return jsonify({"error": "Se requiere 'imagen_base64' o una matriz de 784 píxeles."}), 400
 
     if np.sum(matriz_in) == 0:
         return jsonify({"error": "El lienzo está vacío. Por favor, dibuja un número primero."}), 400
 
-    # Preprocesamiento MNIST estándar (caja delimitadora + centro de masa)
-    matriz_proc = preprocesar_matriz_mnist(matriz_in)
+    # Preprocesamiento MNIST estándar (recorte exacto + Lanczos a 20x20 + centro de masa)
+    matriz_proc = matriz_in if ya_centrado else preprocesar_imagen_mnist(matriz_in)
     pixeles_vector = matriz_proc.reshape(784)
 
     es_norm = metricas.get("normalizado", False) or getattr(modelo, "_normalizado", False)
