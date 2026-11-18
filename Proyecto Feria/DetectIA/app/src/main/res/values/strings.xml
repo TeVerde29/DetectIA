@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">DetectIA</string>
+    <string name="header_title">DetectIA (Offline)</string>
+    <string name="header_subtitle">SVM Lineal One-vs-One • 45 clasificadores • 100% sin internet</string>
+    <string name="canvas_hint">Dibuja un dígito del 0 al 9</string>
+    <string name="btn_clear">Limpiar</string>
+    <string name="btn_predict">Predecir Número</string>
+    <string name="label_prediction">Dígito detectado</string>
+    <string name="label_confidence">Seguridad</string>
+    <string name="label_latency">Tiempo</string>
+    <string name="label_preview_28">Vista IA\n28×28</string>
+    <string name="label_top3">Top 3 probabilidades (Softmax)</string>
+    <string name="msg_loading_model">Cargando modelo SVM…</string>
+    <string name="msg_model_ready">Modelo SVM listo (offline)</string>
+    <string name="msg_empty_canvas">Dibuja un número blanco en el lienzo antes de predecir.</string>
+    <string name="placeholder_dash">—</string>
+</resources>
