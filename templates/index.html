@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DetectIA — Explorador de Muestras (SVM)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-alt: #0b1220;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.14);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.14);
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-group h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .title-group p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .stats-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stat-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+    }
+
+    .stat-pill strong {
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .controls-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .index-form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .index-form label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    input[type="number"] {
+      width: 110px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    input[type="number"]:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: transform 0.08s ease, background-color 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-warning {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-warning:hover {
+      background: rgba(245, 158, 11, 0.28);
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 780px) {
+      .grid-main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+
+    .canvas-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    canvas#digitCanvas {
+      width: 280px;
+      height: 280px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      image-rendering: pixelated;
+      background: #000;
+    }
+
+    .canvas-options {
+      display: flex;
+      gap: 16px;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .canvas-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .comparison-boxes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .digit-box {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .digit-box .label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .digit-box .number {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .status-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .status-banner.ok {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .status-banner.err {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .latency-badge {
+      font-size: 0.82rem;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .bars-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 24px 1fr 56px;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+
+    .bar-digit {
+      font-weight: 700;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .bar-digit.winner {
+      color: #60a5fa;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: var(--surface-alt);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: #475569;
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .bar-fill.winner {
+      background: var(--primary);
+    }
+
+    .bar-pct {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.88rem;
+      margin-top: 6px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>DetectIA — Explorador de Predicciones</h1>
+        <p>Inspección visual en tiempo real sobre las {{ resumen.total_prueba }} muestras de prueba</p>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-pill">Modelo: <strong>{{ resumen.modelo }}</strong></div>
+        <div class="stat-pill">Semilla: <strong>{{ resumen.semilla }}</strong></div>
+        <div class="stat-pill">Precisión: <strong>{{ resumen.accuracy_pct }}%</strong></div>
+        <div class="stat-pill">Errores: <strong>{{ resumen.errores }} / {{ resumen.total_prueba }}</strong></div>
+      </div>
+    </header>
+
+    <section class="controls-card">
+      <form class="index-form" id="formIndice">
+        <label for="inputIndice">Índice de prueba (0 – {{ resumen.total_prueba - 1 }}):</label>
+        <div class="input-group">
+          <button type="button" class="btn-secondary" id="btnPrev" title="Anterior">◀</button>
+          <input type="number" id="inputIndice" min="0" max="{{ resumen.total_prueba - 1 }}" value="1100" required />
+          <button type="button" class="btn-secondary" id="btnNext" title="Siguiente">▶</button>
+        </div>
+        <button type="submit" class="btn-primary">Probar índice</button>
+        <span class="error-msg" id="errorMsg"></span>
+      </form>
+
+      <div class="action-buttons">
+        <button type="button" class="btn-secondary" id="btnAleatorio">🎲 Muestra Aleatoria</button>
+        <button type="button" class="btn-warning" id="btnSiguienteError">⚠️ Siguiente Error del Modelo</button>
+      </div>
+    </section>
+
+    <div class="grid-main">
+      <section class="card">
+        <div class="card-title">Imagen Entrada (28 × 28 px)</div>
+        <div class="canvas-wrapper">
+          <canvas id="digitCanvas" width="280" height="280"></canvas>
+          <div class="canvas-options">
+            <label>
+              <input type="checkbox" id="chkCuadricula" checked />
+              Ver cuadrícula 28×28
+            </label>
+            <label>
+              <input type="checkbox" id="chkInvertir" />
+              Invertir tinta
+            </label>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--muted);">
+            Muestra actual: <strong id="lblIndiceActual" style="color: var(--text);">#1100</strong>
+          </p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">Resultado de Inferencia SVM</div>
+
+        <div class="comparison-boxes">
+          <div class="digit-box">
+            <div class="label">Valor Real (Dataset)</div>
+            <div class="number" id="valReal">-</div>
+          </div>
+          <div class="digit-box">
+            <div class="label">Predicción del Modelo</div>
+            <div class="number" id="valPred">-</div>
+          </div>
+        </div>
+
+        <div class="status-banner ok" id="statusBanner">
+          <span id="statusText">Cargando...</span>
+          <span class="latency-badge" id="latencyText"></span>
+        </div>
+
+        <div class="card-title" style="margin-bottom: 10px;">
+          Afinidad Relativa por Dígito (Decision Score)
+        </div>
+        <div class="bars-list" id="barsContainer"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_MUESTRAS = {{ resumen.total_prueba }};
+    const canvas = document.getElementById("digitCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const inputIndice = document.getElementById("inputIndice");
+    const errorMsg = document.getElementById("errorMsg");
+    const chkCuadricula = document.getElementById("chkCuadricula");
+    const chkInvertir = document.getElementById("chkInvertir");
+
+    let ultimosPixeles = [];
+
+    function renderizarDigito(pixeles) {
+      if (!pixeles || pixeles.length !== 784) return;
+      ultimosPixeles = pixeles;
+
+      const invertir = chkInvertir.checked;
+      const verGrid = chkCuadricula.checked;
+      const cellSize = 10; // 28 * 10 = 280px
+
+      ctx.clearRect(0, 0, 280, 280);
+
+      for (let fila = 0; fila < 28; fila++) {
+        for (let col = 0; col < 28; col++) {
+          const raw = pixeles[fila * 28 + col];
+          const val = invertir ? 255 - raw : raw;
+          ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
+          ctx.fillRect(col * cellSize, fila * cellSize, cellSize, cellSize);
+        }
+      }
+
+      if (verGrid) {
+        ctx.strokeStyle = invertir ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)";
+        ctx.lineWidth = 0.5;
+        for (let i = 1; i < 28; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * cellSize, 0);
+          ctx.lineTo(i * cellSize, 280);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(0, i * cellSize);
+          ctx.lineTo(280, i * cellSize);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function renderizarBarras(puntajes, ganador) {
+      const container = document.getElementById("barsContainer");
+      container.innerHTML = "";
+
+      puntajes.forEach((pct, digito) => {
+        const esGanador = digito === ganador;
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <span class="bar-digit ${esGanador ? "winner" : ""}">${digito}</span>
+          <div class="bar-track">
+            <div class="bar-fill ${esGanador ? "winner" : ""}" style="width: ${pct}%"></div>
+          </div>
+          <span class="bar-pct">${pct.toFixed(1)}%</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function actualizarUI(data) {
+      errorMsg.style.display = "none";
+      inputIndice.value = data.indice;
+      document.getElementById("lblIndiceActual").textContent = `#${data.indice}`;
+      document.getElementById("valReal").textContent = data.valor_real;
+      document.getElementById("valPred").textContent = data.prediccion;
+
+      const banner = document.getElementById("statusBanner");
+      const statusText = document.getElementById("statusText");
+      const latencyText = document.getElementById("latencyText");
+
+      if (data.acierto) {
+        banner.className = "status-banner ok";
+        statusText.textContent = "✅ ACIERTO — Clasificación correcta";
+      } else {
+        banner.className = "status-banner err";
+        statusText.textContent = `❌ ERROR — Confundió un ${data.valor_real} con un ${data.prediccion}`;
+      }
+      latencyText.textContent = `Inferencia: ${data.latencia_ms} ms`;
+
+      renderizarDigito(data.pixeles);
+      renderizarBarras(data.puntajes, data.prediccion);
+    }
+
+    async function cargarUrl(url) {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) {
+          errorMsg.textContent = data.error || "Error al consultar la muestra.";
+          errorMsg.style.display = "inline";
+          return;
+        }
+        actualizarUI(data);
+      } catch (err) {
+        errorMsg.textContent = "Error de conexión con el servidor Flask.";
+        errorMsg.style.display = "inline";
+      }
+    }
+
+    function cargarIndice(idx) {
+      const n = Number(idx);
+      if (Number.isNaN(n) || n < 0 || n >= TOTAL_MUESTRAS) {
+        errorMsg.textContent = `Ingresa un índice válido entre 0 y ${TOTAL_MUESTRAS - 1}.`;
+        errorMsg.style.display = "inline";
+        return;
+      }
+      cargarUrl(`/api/muestra/${n}`);
+    }
+
+    document.getElementById("formIndice").addEventListener("submit", (e) => {
+      e.preventDefault();
+      cargarIndice(inputIndice.value);
+    });
+
+    document.getElementById("btnPrev").addEventListener("click", () => {
+      const actual = Number(inputIndice.value) || 0;
+      cargarIndice(Math.max(0, actual - 1));
+    });
+
+    document.getElementById("btnNext").addEventListener("click", () => {
+      const actual = Number(inputIndice.value) || 0;
+      cargarIndice(Math.min(TOTAL_MUESTRAS - 1, actual + 1));
+    });
+
+    document.getElementById("btnAleatorio").addEventListener("click", () => {
+      cargarUrl("/api/aleatorio");
+    });
+
+    document.getElementById("btnSiguienteError").addEventListener("click", () => {
+      const actual = Number(inputIndice.value) || 0;
+      cargarUrl(`/api/siguiente-error?actual=${actual}`);
+    });
+
+    chkCuadricula.addEventListener("change", () => renderizarDigito(ultimosPixeles));
+    chkInvertir.addEventListener("change", () => renderizarDigito(ultimosPixeles));
+
+    // Cargar muestra inicial (1100) al abrir la página
+    cargarIndice(1100);
+  </script>
+</body>
+</html>

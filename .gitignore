@@ -1,0 +1,23 @@
+# Entorno virtual Python
+.venv/
+venv/
+env/
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Modelos entrenados y artefactos pesados generados localmente
+modelos/
+*.joblib
+*.npz
+*.pkl
+*.pth
+*.onnx
+
+# Archivos de sistema / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
