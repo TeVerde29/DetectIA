@@ -1,6 +1,7 @@
 package unu.edu.detectia
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -13,8 +14,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Lienzo táctil cuadrado con fondo negro (#000000) y trazo blanco (#FFFFFF)
- * grueso y suavizado, optimizado para capturar dígitos estilo MNIST.
+ * Lienzo táctil cuadrado adaptable con tema:
+ * - Modo Claro: Fondo blanco (#FFFFFF) y trazo negro (#1F1F1F)
+ * - Modo Oscuro: Fondo oscuro (#1E1F20) y trazo blanco (#FFFFFF)
+ * Internamente genera una copia estandarizada con fondo negro y trazo blanco
+ * para garantizar la compatibilidad matemática con el modelo MNIST (28x28).
  */
 class DrawingView @JvmOverloads constructor(
     context: Context,
@@ -22,8 +26,9 @@ class DrawingView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private var isDarkMode: Boolean = false
+
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
@@ -31,15 +36,32 @@ class DrawingView @JvmOverloads constructor(
         strokeWidth = 48f
     }
 
+    private val recordedPath = Path()
     private val currentPath = Path()
-    private var bitmap: Bitmap? = null
-    private var bitmapCanvas: Canvas? = null
 
     private var lastX = 0f
     private var lastY = 0f
     private var hasDrawn = false
 
     var onDrawStateChanged: ((hasContent: Boolean) -> Unit)? = null
+
+    init {
+        val uiMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        isDarkMode = (uiMode == Configuration.UI_MODE_NIGHT_YES)
+        updatePaintColor()
+    }
+
+    fun setNightMode(isNight: Boolean) {
+        if (isDarkMode != isNight) {
+            isDarkMode = isNight
+            updatePaintColor()
+            invalidate()
+        }
+    }
+
+    private fun updatePaintColor() {
+        strokePaint.color = if (isDarkMode) Color.WHITE else Color.parseColor("#1F1F1F")
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -56,33 +78,20 @@ class DrawingView @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (w <= 0 || h <= 0) return
-
-        // Grosor proporcional al tamaño del lienzo (~8.5% del lado) para simular el trazo MNIST
+        // Grosor proporcional al tamaño del lienzo (~8.5% del lado) para emular trazo MNIST
         strokePaint.strokeWidth = max(18f, min(w, h) * 0.085f)
-
-        val previousBitmap = bitmap
-        val newBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val newCanvas = Canvas(newBitmap).apply {
-            drawColor(Color.BLACK)
-        }
-        if (previousBitmap != null && hasDrawn) {
-            val destRect = android.graphics.Rect(0, 0, w, h)
-            newCanvas.drawBitmap(previousBitmap, null, destRect, null)
-        }
-        previousBitmap?.recycle()
-        bitmap = newBitmap
-        bitmapCanvas = newCanvas
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val currentBitmap = bitmap
-        if (currentBitmap != null) {
-            canvas.drawBitmap(currentBitmap, 0f, 0f, null)
-        } else {
-            canvas.drawColor(Color.BLACK)
+        val bgColor = if (isDarkMode) Color.parseColor("#1E1F20") else Color.WHITE
+        canvas.drawColor(bgColor)
+
+        updatePaintColor()
+        canvas.drawPath(recordedPath, strokePaint)
+        if (!currentPath.isEmpty) {
+            canvas.drawPath(currentPath, strokePaint)
         }
-        canvas.drawPath(currentPath, strokePaint)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -94,7 +103,6 @@ class DrawingView @JvmOverloads constructor(
                 parent?.requestDisallowInterceptTouchEvent(true)
                 currentPath.reset()
                 currentPath.moveTo(x, y)
-                // Pequeño desplazamiento para permitir trazos de un solo toque
                 currentPath.lineTo(x + 0.1f, y + 0.1f)
                 lastX = x
                 lastY = y
@@ -119,7 +127,7 @@ class DrawingView @JvmOverloads constructor(
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 currentPath.lineTo(x, y)
-                bitmapCanvas?.drawPath(currentPath, strokePaint)
+                recordedPath.addPath(currentPath)
                 currentPath.reset()
                 parent?.requestDisallowInterceptTouchEvent(false)
                 invalidate()
@@ -130,33 +138,38 @@ class DrawingView @JvmOverloads constructor(
     }
 
     /**
-     * Limpia completamente el lienzo volviéndolo a negro sólido.
+     * Limpia completamente el lienzo manteniendo el color de fondo correspondiente.
      */
     fun clear() {
+        recordedPath.reset()
         currentPath.reset()
-        bitmapCanvas?.drawColor(Color.BLACK)
         hasDrawn = false
         onDrawStateChanged?.invoke(false)
         invalidate()
     }
 
     /**
-     * Devuelve una copia inmutable en ARGB_8888 del dibujo actual sobre fondo negro.
+     * Devuelve una copia en ARGB_8888 con fondo negro (#000000) y trazo blanco (#FFFFFF)
+     * para la inferencia de MNIST por el clasificador SVM.
      */
     fun getBitmap(): Bitmap {
         val w = max(width, 1)
         val h = max(height, 1)
-        val currentBitmap = bitmap
-        if (currentBitmap != null) {
-            val copy = currentBitmap.copy(Bitmap.Config.ARGB_8888, true)
-            if (!currentPath.isEmpty) {
-                Canvas(copy).drawPath(currentPath, strokePaint)
-            }
-            return copy
+        val mnistBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val mnistCanvas = Canvas(mnistBitmap).apply {
+            drawColor(Color.BLACK)
         }
-        return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply {
-            Canvas(this).drawColor(Color.BLACK)
+
+        val mnistPaint = Paint(strokePaint).apply {
+            color = Color.WHITE
         }
+
+        mnistCanvas.drawPath(recordedPath, mnistPaint)
+        if (!currentPath.isEmpty) {
+            mnistCanvas.drawPath(currentPath, mnistPaint)
+        }
+
+        return mnistBitmap
     }
 
     fun hasDrawing(): Boolean = hasDrawn

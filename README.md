@@ -1,118 +1,140 @@
-# DetectIA — Reconocimiento de Dígitos Manuscritos
+# DetectIA — Laboratorio Multi-Modelo y Plataforma Móvil de Reconocimiento de Dígitos
 
-> Sistema de aprendizaje automático para la clasificación y análisis de dígitos manuscritos en matrices de 28x28 píxeles a partir del dataset MNIST.
+> Sistema integral de aprendizaje automático para la clasificación, comparación y análisis de dígitos manuscritos (MNIST) mediante interfaz web estilo Google Translate y aplicación nativa Android 100% offline.
 
 ![Estado](https://img.shields.io/badge/Estado-Activo-success)
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![scikit--learn](https://img.shields.io/badge/scikit--learn-1.9.1-orange)
-![Pandas](https://img.shields.io/badge/Pandas-3.0.5-150458)
-![NumPy](https://img.shields.io/badge/NumPy-2.4.6-013243)
-![Matplotlib](https://img.shields.io/badge/Matplotlib-3.11.1-11557c)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)
+![scikit--learn](https://img.shields.io/badge/scikit--learn-1.5-F7931E?logo=scikitlearn&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-1.9-7F52FF?logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Android-SDK%2035-3DDC84?logo=android&logoColor=white)
 
 ## Capturas
 
-| Muestras del dataset MNIST | Matriz de confusión multiclase |
+| Laboratorio web interactivo (diseño Google Translate) | Matriz de confusión multiclase SVM |
 | :---: | :---: |
-| ![Muestras MNIST](img/muestra_digitos.png) | ![Matriz de confusión](img/matriz_confusion.png) |
+| ![Laboratorio web](img/web_laboratorio.png) | ![Matriz de confusión](img/matriz_confusion.png) |
 
-| Distribución de clases (0 al 9) |
-| :---: |
-| ![Histograma de distribución](img/histograma_distribucion.png) |
+| App Android nativa offline (Modo Claro) | App Android nativa offline (Modo Oscuro) |
+| :---: | :---: |
+| ![App Android Modo Claro](img/app_modo_claro.png) | ![App Android Modo Oscuro](img/app_modo_oscuro.png) |
 
-El usuario ejecuta el flujo de entrenamiento y evaluación a través de scripts de consola; el sistema procesa 42.000 vectores de 784 píxeles, entrena un clasificador de vectores de soporte (SVM) y presenta los resultados mediante visualizaciones gráficas y matrices de error.
+Los investigadores y estudiantes exploran el laboratorio web para contrastar la exactitud y los vectores de probabilidad entre Máquinas de Soporte Vectorial (SVM) y Redes Neuronales Artificiales (MLP) sobre casos límite de MNIST, mientras que los usuarios móviles dibujan trazos sobre la pantalla táctil de su dispositivo Android para obtener inferencias instantáneas en 0.23 ms sin conexión a internet ni servidores externos.
 
 ## Tabla de contenidos
 
 1. [Descripción](#descripción)
-2. [Repositorio](#repositorio)
+2. [Demo / Producción / Descarga](#demo--producción--descarga)
 3. [Características principales](#características-principales)
 4. [Stack tecnológico](#stack-tecnológico)
 5. [Arquitectura](#arquitectura)
-6. [Estructura del dataset](#estructura-del-dataset)
-7. [Instalación y uso](#instalación-y-uso)
-8. [Requisitos del sistema](#requisitos-del-sistema)
-9. [Flujo de ejecución y métricas](#flujo-de-ejecución-y-métricas)
-10. [Autor](#autor)
+6. [Instalación y uso](#instalación-y-uso)
+7. [Requisitos del sistema](#requisitos-del-sistema)
+8. [Especificación de la API REST](#especificación-de-la-api-rest)
+9. [Preprocesamiento matemático MNIST](#preprocesamiento-matemático-mnist)
+10. [Motor de inferencia Android One-vs-One](#motor-de-inferencia-android-one-vs-one)
+11. [Comparativa de modelos](#comparativa-de-modelos)
+12. [Licencia](#licencia)
+13. [Autor](#autor)
 
 ---
 
 ## Descripción
 
-El reconocimiento de caracteres manuscritos presenta variaciones significativas en grosor de trazo, inclinación, centrado y escala. DetectIA resuelve este problema aislando y normalizando muestras de dígitos individualizados en mallas de $28 \times 28$ niveles de gris para proyectar hiperplanos de separación óptimos entre 10 clases numéricas disjuntas (0 al 9).
+El reconocimiento de dígitos manuscritos presenta problemas complejos debido a la heterogeneidad caligráfica: variaciones de escala, grosor de trazo, excentricidad y desalineación espacial respecto a la cuadrícula de captura. DetectIA aborda este desafío mediante una solución desacoplada que normaliza trazos libres hacia una cuadrícula estándar de $28 \times 28$ píxeles y ejecuta clasificación multiclase sobre 10 categorías numéricas (del 0 al 9).
 
-El sistema procesa el dataset estructurado en `DATOS/digitos.csv` (42.000 filas y 785 columnas), ejecutando la separación de la variable objetivo `label` respecto a los 784 atributos de intensidad `pixel0` a `pixel783`. A través del script `digitos.py`, se entrena un modelo de máquina de soporte vectorial (`SVC`) con kernel lineal, evaluando su comportamiento sobre un conjunto de prueba desacoplado (25% del total, correspondiente a 10.500 imágenes no vistas).
+El proyecto integra dos entornos operativos complementarios. Por un lado, una plataforma web construida en Flask con estética minimalista basada en Google Translate, que admite dibujo libre y carga de imágenes, facilitando la comparación lado a lado entre clasificadores de margen lineal (SVM) y arquitecturas densas no lineales (Redes Neuronales Perceptrón Multicapa). Por otro lado, una aplicación nativa Android desarrollada en Kotlin que traslada el modelo SVM a la arquitectura del cliente móvil, ejecutando inferencia 100% offline con tiempos de respuesta inferiores a un milisegundo.
 
-A nivel de diseño de software, el sistema prescinde de bases de datos persistentes: el conocimiento matemático queda condensado en los coeficientes y vectores de soporte calculados durante el entrenamiento. Todo el ciclo de vida del proyecto está documentado formalmente bajo metodología en cascada en `analisis.md` y `diseno.md`.
+A nivel de diseño de ingeniería, el sistema descarta bases de datos persistentes: el conocimiento matemático del clasificador reside en los parámetros vectoriales y sesgos serializados. El pipeline de procesamiento asegura paridad estricta entre cliente y servidor mediante centrado por centro de masa subpíxel y redimensionamiento proporcional Lanczos, garantizando que los trazos dibujados a mano emulen con fidelidad la distribución del dataset MNIST.
 
-## Repositorio
+## Demo / Producción / Descarga
 
-| Capa | Recurso | URL |
+| Capa / Recurso | Detalle | Enlace |
 | :--- | :--- | :--- |
-| Código fuente | Repositorio GitHub | https://github.com/TeVerde29/DetectIA |
-| Datos | Dataset MNIST (CSV) | [`DATOS/digitos.csv`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/DATOS/digitos.csv) |
-| Especificación | Análisis de requerimientos | [`analisis.md`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/analisis.md) |
-| Arquitectura | Diseño del sistema | [`diseno.md`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/diseno.md) |
+| Código fuente | Repositorio oficial en GitHub | [https://github.com/TeVerde29/DetectIA](https://github.com/TeVerde29/DetectIA) |
+| Aplicación móvil | APK instalable Android (Debug) | [`Proyecto Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/Proyecto%20Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk) |
+| Datos de entrenamiento | Dataset tabular MNIST (42.000 muestras) | [`DATOS/digitos.csv`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/DATOS/digitos.csv) |
+| Especificación formal | Requerimientos bajo ciclo cascada | [`desarrollo/analisis.md`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/desarrollo/analisis.md) |
+| Documento de diseño | Arquitectura técnica y diagramas | [`desarrollo/diseno.md`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/desarrollo/diseno.md) |
 
 ## Características principales
 
-- **Clasificador SVM Lineal:** Entrenamiento mediante `sklearn.svm.SVC(kernel='linear')` optimizado para espacios de 784 dimensiones continuas.
-- **Partición estratificada de datos:** División del conjunto en 31.500 muestras de entrenamiento y 10.500 de validación mediante `train_test_split(test_size=0.25)`.
-- **Renderizado espacial de dígitos:** Función interna `mostrar_num` que remodela arrays unidimensionales de 784 elementos en tensores de $28 \times 28$ e invoca `plt.imshow`.
-- **Validación puntual y global:** Evaluación simultánea de métricas de exactitud (`accuracy_score`), pruebas de inferencia unitarias (ejemplo de prueba individual en índice 1100) y cálculo de matriz de confusión de $10 \times 10$.
-- **Inspección de balance de clases:** Histogramas y conteos de distribución (`df['label'].value_counts()`) que confirman un rango equilibrado entre ~3.795 y ~4.684 muestras por dígito.
-- **Documentación de ingeniería formal:** Definición estricta de 10 Requerimientos Funcionales (RF), 6 Requerimientos No Funcionales (RNF) y 5 Reglas de Negocio (RN) bajo ciclo de vida en cascada.
+- **Arquitectura multi-modelo desacoplada:** Estructura de directorios modular en `modelos/` que permite registrar modelos independientes (SVM Lineal y Red Neuronal MLP) con metadatos de configuración en `info.json`.
+- **Laboratorio web con estética Google Translate:** Panel interactivo en Flask con lienzo HTML5, barra de navegación superior, cambio de vistas (dibujo o archivo) y visualización simultánea de dos modelos.
+- **Preprocesamiento matemático estricto:** Aislamiento de la caja delimitadora (*bounding box*), escalado proporcional Lanczos a una malla de $20 \times 20$ y reubicación subpíxel por centro de masa a la coordenada $(13.5, 13.5)$.
+- **Inferencia Android nativa 100% offline:** Motor algebraico en Kotlin puro (`SvmLinearClassifier.kt`) que evalúa 45 hiperplanos One-vs-One sin requerir TensorFlow Lite ni dependencias externas pesadas.
+- **Rendimiento de ultra-baja latencia:** Tiempos de ejecución en dispositivo móvil de 0.20 ms a 0.35 ms por predicción sobre procesadores ARM comerciales.
+- **Soporte nativo de temas Claro y Oscuro:** Adaptabilidad visual completa en la aplicación móvil con conmutación dinámica de paletas cromáticas de alto contraste.
+- **Explorador de discrepancias empíricas:** Mecanismo en servidor para extraer de forma automática muestras del conjunto de prueba donde el clasificador lineal y la red neuronal emiten predicciones divergentes.
 
 ## Stack tecnológico
 
 | Capa / Componente | Tecnología | Versión | Función en el sistema |
 | :--- | :--- | :--- | :--- |
-| Lenguaje base | Python | 3.11.0 | Entorno de ejecución principal de scripts y pipelines |
-| Aprendizaje automático | scikit-learn | 1.9.1 | Clasificación multiclase (`SVC`), métricas y partición |
-| Procesamiento tabular | pandas | 3.0.5 | Carga, segmentación (`iloc`) e inspección de `digitos.csv` |
-| Cálculo numérico | numpy | 2.4.6 | Conversión y reformateo de matrices ($1\text{D} \rightarrow 28\times28$) |
-| Graficación científica | matplotlib | 3.11.1 | Visualización de imágenes, histogramas y mapas de calor |
-| Documentación de diseño | Markdown / Mermaid | GFM | Diagramas de flujo de datos, arquitectura y secuencias |
+| Lenguaje servidor | Python | 3.11.0 | Entorno de backend, pipelines y cálculo científico |
+| Framework web | Flask | >= 3.0.0 | API REST y servidor de la interfaz web |
+| Aprendizaje automático | scikit-learn | >= 1.5.0 | Algoritmos `LinearSVC` y `MLPClassifier` |
+| Cálculo matricial | NumPy | >= 2.0.0 | Operaciones tensoriales y normalización vectorial |
+| Manipulación de datos | pandas | >= 2.0.0 | Carga y segmentación de datos tabulares MNIST |
+| Procesamiento de imagen | Pillow / SciPy | >= 10.0 / >= 1.12 | Interpolación Lanczos y cálculo de centro de masa |
+| Lenguaje móvil | Kotlin | 1.9.0 | Lógica nativa de la aplicación Android |
+| Plataforma móvil | Android SDK | SDK 35 (compile 37) | Sistema operativo de la aplicación de usuario final |
+| Interfaz móvil | Material Components | 1.10.0 | Componentes UI, tipografía Google Sans y estilos |
+| Serialización móvil | JSON | RFC 8259 | Almacenamiento empaquetado de pesos ($W, b$) en assets |
 
 ## Arquitectura
-
-El repositorio está organizado en módulos funcionales directos:
 
 ```text
 DetectIA/
 ├── DATOS/
-│   ├── digitos.csv             # Dataset MNIST: 42.000 filas x 785 columnas (76.7 MB)
-│   └── digitos.docx            # Especificación original con capturas de código
+│   └── digitos.csv                         # Dataset MNIST: 42.000 filas x 785 columnas
+├── desarrollo/
+│   ├── analisis.md                         # Requerimientos funcionales y reglas de negocio
+│   └── diseno.md                           # Diagramas de flujo y arquitectura técnica
 ├── img/
-│   ├── muestra_digitos.png     # Visualización de la rejilla de dígitos de muestra
-│   ├── histograma_distribucion.png # Frecuencia de registros por dígito
-│   └── matriz_confusion.png    # Mapa de calor de aciertos y errores
-├── analisis.md                 # Metodología cascada, RF, RNF y Reglas de Negocio
-├── diseno.md                   # Arquitectura técnica, justificación sin BD y diagramas
-├── digitos.py                  # Script ejecutable de entrenamiento y validación SVM
-└── README.md                   # Documentación general del repositorio
+│   ├── app_modo_claro.png                  # Captura de pantalla Android en tema claro
+│   ├── app_modo_oscuro.png                 # Captura de pantalla Android en tema oscuro
+│   ├── web_laboratorio.png                 # Captura de la interfaz web multi-modelo
+│   ├── matriz_confusion.png                # Mapa de calor de evaluación multiclase
+│   ├── muestra_digitos.png                 # Muestra de caracteres del dataset
+│   └── histograma_distribucion.png         # Balance de frecuencias por clase numérica
+├── modelos/
+│   ├── cnn/
+│   │   ├── info.json                       # Configuración y metadatos de la Red Neuronal
+│   │   ├── metricas_cnn.json               # Métricas de prueba y exactitud (97.34%)
+│   │   └── modelo_cnn.joblib               # Binario entrenado de MLPClassifier
+│   ├── svm/
+│   │   ├── info.json                       # Configuración y metadatos del modelo SVM
+│   │   ├── metricas_svm.json               # Métricas de prueba y exactitud (93.11%)
+│   │   └── modelo_svm.joblib               # Binario entrenado de LinearSVC
+│   ├── datos_test.npz                      # 10.500 vectores de prueba desacoplados
+│   └── discrepancias.json                  # Índices de validación con divergencia de modelos
+├── Proyecto Feria/DetectIA/                # Proyecto Android Studio (Kotlin nativo)
+│   ├── app/
+│   │   ├── src/main/assets/
+│   │   │   └── modelo_linear_android.json  # Pesos (45x784) y sesgos embebidos (268 KB)
+│   │   ├── src/main/java/unu/edu/detectia/
+│   │   │   ├── DrawingView.kt              # Lienzo táctil con interpolación de trazo
+│   │   │   ├── MainActivity.kt             # Ciclo de vida UI y alternancia claro/oscuro
+│   │   │   ├── MnistPreprocessor.kt        # Bounding box, Lanczos y centrado por masa
+│   │   │   └── SvmLinearClassifier.kt      # Motor de inferencia One-vs-One y Softmax
+│   │   └── src/main/res/                   # Layouts, fuentes Google Sans y temas día/noche
+│   └── build.gradle.kts                    # Configuración de compilación Android
+├── static/
+│   └── img/                                # Recursos gráficos y logos de la web
+├── templates/
+│   └── index.html                          # Interfaz web responsiva con canvas interactivo
+├── app.py                                  # Servidor Flask y controlador de inferencia REST
+├── digitos.py                              # Pipeline clásico de validación y graficación
+└── requirements.txt                        # Especificación estricta de dependencias Python
 ```
 
 ### Decisiones de arquitectura
 
-- **Persistencia sin base de datos:** El sistema no utiliza motores SQL ni NoSQL. La inferencia es determinista y sin estado (*stateless*); los parámetros aprendidos residen en los vectores de soporte del objeto `SVC`.
-- **Segmentación por índices numéricos:** La separación de datos se realiza de forma fija vía `df.iloc[:, 1:785]` para el vector de características $X$ y `df.iloc[:, 0:1]` para el vector objetivo $y$.
-- **Ruta de datos tolerante a contexto:** `digitos.py` detecta dinámicamente si el archivo de datos está situado en el directorio actual (`digitos.csv`) o en la carpeta secundaria (`DATOS/digitos.csv`).
-
-## Estructura del dataset
-
-El archivo `DATOS/digitos.csv` contiene imágenes digitalizadas en escala de grises de 8 bits por canal (valores entre 0 y 255):
-
-```csv
-label,pixel0,pixel1,pixel2,...,pixel782,pixel783
-1,0,0,0,...,0,0
-0,0,0,0,...,0,0
-1,0,0,0,...,0,0
-4,0,0,0,...,0,0
-0,0,0,0,...,0,0
-```
-
-- `label`: Entero del 0 al 9 que representa la clase real del dígito.
-- `pixel0` a `pixel783`: Nivel de intensidad lumínica de cada una de las celdas de la cuadrícula de $28 \times 28$ ($28 \times 28 = 784$). El valor 0 denota fondo blanco/negro inactivo y 255 denota máxima intensidad de trazo.
+- **Persistencia en coeficientes algebraicos:** No existen bases de datos relacionales ni motores SQL. El aprendizaje se traduce directamente a hiperplanos de corte definidos por matrices de pesos y vectores de sesgo.
+- **Preprocesamiento desacoplado pero idéntico:** Tanto `app.py` en Python como `MnistPreprocessor.kt` en Android replican las mismas fases matemáticas: extracción de caja delimitadora, escalado a $20 \times 20$, centrado por centro de masa sobre matriz de $28 \times 28$ y normalización de intensidad en rango $[0, 1]$.
+- **Inferencia perimetral (Edge Computing):** La aplicación móvil no realiza peticiones HTTP para predecir. El clasificador reside en el paquete APK en formato JSON optimizado, asegurando privacidad total y funcionamiento autónomo sin cobertura de red.
+- **Modularidad extensible:** El directorio `modelos/` permite incorporar nuevos modelos de clasificación sin modificar el código del servidor; basta con crear una subcarpeta con su `info.json` y archivo `.joblib`.
 
 ## Instalación y uso
 
@@ -123,61 +145,161 @@ git clone https://github.com/TeVerde29/DetectIA.git
 cd DetectIA
 ```
 
-### 2. Verificar o instalar dependencias
+### 2. Configurar el entorno de Python
 
 ```bash
-pip install pandas numpy matplotlib scikit-learn
+python -m venv .venv
+# En Windows (PowerShell):
+.venv\Scripts\Activate.ps1
+# En Linux / macOS:
+source .venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
-### 3. Ejecución del pipeline
-
-Ejecuta el script principal desde la raíz del proyecto:
+### 3. Iniciar el laboratorio web
 
 ```bash
-python digitos.py
+python app.py
 ```
 
-### Flujo secuencial de ejecución
+El servidor quedará a la escucha en `http://127.0.0.1:5000`.
 
-1. **Carga e inspección:** El sistema lee `DATOS/digitos.csv`, imprime `df.info()`, las primeras 5 filas y la distribución de clases.
-2. **Generación de histograma:** Se abre la ventana gráfica de distribución; ciérrala para continuar el flujo.
-3. **Muestra visual:** Se grafica una muestra individual de prueba (`X_test.iloc[3]`) reconstruida en $28 \times 28$.
-4. **Entrenamiento:** Inicia `modelo.fit(X_train.values, y_train.values.ravel())`. La consola imprime el tiempo transcurrido (aproximadamente 50 a 60 segundos según CPU).
-5. **Reporte de exactitud:** Se generan predicciones sobre 10.500 muestras y se imprime la precisión global (aproximadamente `0.9697` o 97%).
-6. **Prueba unitaria:** Se procesa el registro 1100, comparando el valor esperado contra el predicho por la máquina.
-7. **Matriz de confusión:** Se calcula la matriz $10 \times 10$ y se despliega el mapa de calor con el recuento exacto de predicciones correctas e incorrectas.
+### 4. Compilar la aplicación Android
+
+Desde el directorio del proyecto móvil:
+
+```bash
+cd "Proyecto Feria/DetectIA"
+# En Windows:
+.\gradlew.bat assembleDebug
+# En Linux / macOS:
+./gradlew assembleDebug
+```
+
+El archivo APK generado se ubicará en:
+`Proyecto Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk`
+
+### Flujo básico de uso
+
+1. **Selección de modalidad:** Abrir la aplicación móvil o ingresar al laboratorio web en el navegador.
+2. **Dibujo de trazo:** Dibujar con el ratón o con el dedo un dígito del 0 al 9 en el lienzo central.
+3. **Ejecución de inferencia:** Pulsar sobre el botón principal **"Predecir Número"**.
+4. **Análisis de resultados:** Observar la miniatura procesada de $28 \times 28$, la clase predicha con mayor probabilidad y el desglose de afinidad Softmax.
+5. **Modo comparativo (Web):** Seleccionar la opción de dos modelos simultáneos para contrastar la hipótesis de corte del modelo lineal frente a la red neuronal.
 
 ## Requisitos del sistema
 
 | Componente | Requisito mínimo | Requisito recomendado |
 | :--- | :--- | :--- |
-| Sistema Operativo | Windows 10 / Ubuntu 20.04 / macOS 12 | Windows 11 / Linux x86_64 |
-| Procesador (CPU) | Doble núcleo 2.0 GHz | Cuatro núcleos 3.0 GHz o superior |
-| Memoria RAM | 4 GB | 8 GB o superior |
-| Espacio en disco | 500 MB libres (dataset: ~77 MB) | 1 GB libre |
-| Intérprete | Python 3.10+ | Python 3.11+ |
+| Sistema Operativo (Servidor) | Windows 10 / Ubuntu 20.04 / macOS 12 | Windows 11 / Linux x86_64 |
+| Dispositivo Móvil (Cliente) | Android 7.0 (API 24 - Nougat) | Android 11.0 o superior (API 30+) |
+| Memoria RAM (Servidor) | 4 GB | 8 GB |
+| Memoria RAM (Dispositivo móvil) | 2 GB | 4 GB |
+| Procesador (CPU Servidor) | Dual-core 2.0 GHz | Quad-core 3.0 GHz |
+| Espacio en disco | 600 MB libres | 1.5 GB libres |
+| Entorno de ejecución | Python 3.11+ / Java JDK 17+ | Python 3.11 / JDK 17 / Android Studio |
 
-## Flujo de ejecución y métricas
+## Especificación de la API REST
+
+El servidor `app.py` expone las siguientes rutas de servicio:
 
 ```text
-Cargando dataset desde: DATOS/digitos.csv ...
-RangeIndex: 42000 entries, 0 to 41999
-Columns: 785 entries, label to pixel783
-dtypes: int64(785)
-memory usage: 251.5 MB
-
-Dimensiones de entrenamiento: (31500, 784)
-Dimensiones de prueba:        (10500, 784)
-
-Iniciando entrenamiento del modelo SVM (kernel='linear') ...
-Entrenamiento terminado en ~59.56 segundos
-Predicción terminada en ~97.29 segundos
-Precisión alcanzada: 0.96976 (96.98%)
+GET  /                          Renderiza la interfaz gráfica interactiva.
+GET  /api/modelos               Lista los modelos registrados y sus metadatos de exactitud.
+POST /api/predecir-dibujo       Recibe una imagen en Base64 o array de 784 px y devuelve la predicción.
+GET  /api/muestra/<int:idx>     Recupera un vector del conjunto de test por índice (0 a 10.499).
+GET  /api/aleatorio             Retorna una muestra aleatoria del conjunto de prueba.
+GET  /api/siguiente-discrepancia Devuelve la siguiente muestra donde SVM y Red Neuronal difieren.
+GET  /api/siguiente-error       Retorna la siguiente muestra fallada por el modelo especificado.
 ```
+
+### Ejemplo de petición y respuesta en `/api/predecir-dibujo`
+
+**Petición (JSON):**
+```json
+{
+  "imagen_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+  "modelo_id": "ambos"
+}
+```
+
+**Respuesta (JSON):**
+```json
+{
+  "modo": "ambos",
+  "coinciden": true,
+  "prediccion": 3,
+  "confianza": 75.0,
+  "latencia_ms": 1.25,
+  "modelos": {
+    "svm": {
+      "nombre": "SVM Lineal",
+      "prediccion": 3,
+      "confianza": 75.0,
+      "latencia_ms": 0.82,
+      "puntajes": [0.0, 0.0, 10.0, 75.0, 0.0, 0.0, 0.0, 0.0, 10.0, 5.0]
+    },
+    "cnn": {
+      "nombre": "Red Neuronal MLP",
+      "prediccion": 3,
+      "confianza": 94.2,
+      "latencia_ms": 0.43,
+      "puntajes": [0.1, 0.0, 0.5, 94.2, 0.0, 2.1, 0.0, 0.1, 2.5, 0.5]
+    }
+  }
+}
+```
+
+## Preprocesamiento matemático MNIST
+
+Para que la clasificación sea robusta ante dibujos realizados en lienzos de alta resolución, la imagen se somete al siguiente pipeline:
+
+1. **Aislamiento de la región activa:** Se calcula la caja delimitadora $[x_{\min}, y_{\min}, x_{\max}, y_{\max}]$ descartando los píxeles de fondo.
+2. **Escalado con conservación de relación de aspecto:** La dimensión mayor de la caja se redimensiona a 20 píxeles usando interpolación Lanczos, ajustando proporcionalmente la otra dimensión:
+   $$\text{escala} = \frac{20}{\max(w, h)}$$
+3. **Cálculo del centro de masa:** Sobre el lienzo de $28 \times 28$, se obtienen las coordenadas baricéntricas ponderadas por la intensidad de cada píxel $I(x, y)$:
+   $$c_x = \frac{\sum x \cdot I(x, y)}{\sum I(x, y)}, \quad c_y = \frac{\sum y \cdot I(x, y)}{\sum I(x, y)}$$
+4. **Desplazamiento subpíxel:** La matriz se traslada para alinear su centro de masa con el centro geométrico oficial de MNIST en $(13.5, 13.5)$:
+   $$\Delta x = 13.5 - c_x, \quad \Delta y = 13.5 - c_y$$
+
+## Motor de inferencia Android One-vs-One
+
+El clasificador móvil no requiere librerías externas ni intérpretes de red neuronal. Ejecuta la formulación algebraica multiclase de *Support Vector Classifier* bajo la estrategia One-vs-One (OvO):
+
+Para $K = 10$ clases, se evalúan $N = \frac{K(K - 1)}{2} = 45$ hiperplanos binarios independientes. Cada clasificador $k$ entre la clase $i$ y la clase $j$ calcula el producto escalar:
+
+$$d_k = \mathbf{w}_k \cdot \mathbf{x} + b_k = \sum_{f=0}^{783} w_{k, f} \cdot x_f + b_k$$
+
+- Si $d_k > 0$, se suma un voto a la clase $i$ y se acumula $d_k$ en su confianza continua.
+- Si $d_k \le 0$, se suma un voto a la clase $j$ y se resta $d_k$ en su confianza continua.
+
+La clase final predicha corresponde a aquella con mayor número de votos acumulados. Posteriormente, las puntuaciones continuas normalizadas se transforman en porcentajes mediante la función Softmax:
+
+$$P(\text{clase } c) = \frac{e^{\sigma \cdot s_c}}{\sum_{m=0}^{9} e^{\sigma \cdot s_m}} \times 100\%$$
+
+## Comparativa de modelos
+
+Evaluación realizada sobre el conjunto de prueba independiente de 10.500 imágenes (`modelos/datos_test.npz`):
+
+| Métrica / Parámetro | SVM Lineal (`LinearSVC`) | Red Neuronal Artificial (`MLPClassifier`) |
+| :--- | :--- | :--- |
+| Exactitud global (*Accuracy*) | **93.11%** | **97.34%** |
+| Aciertos en test | 9.777 de 10.500 | 10.221 de 10.500 |
+| Errores en test | 723 de 10.500 | 279 de 10.500 |
+| Tiempo de entrenamiento | 76.47 segundos | 29.61 segundos |
+| Tiempo de inferencia (Web batch) | 28.23 segundos (2.6 ms/muestra) | 0.03 segundos (0.003 ms/muestra) |
+| Latencia móvil unitaria (Android) | **0.23 ms - 0.32 ms** | N/A (Solo servidor) |
+| Peso del modelo exportado | 268 KB (JSON de coeficientes) | 3.2 MB (Joblib) |
+| Dependencia de ejecución | Kotlin puro / Sin librerías | scikit-learn / Servidor |
+
+## Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**.
 
 ---
 
-**Té Verde** (`@TeVerde29`)  
+**Té Verde** (@TeVerde29)  
 GitHub: [https://github.com/TeVerde29](https://github.com/TeVerde29)  
 Contacto: hikih020@gmail.com
 

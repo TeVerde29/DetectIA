@@ -13,68 +13,108 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="20dp"
-        android:paddingTop="16dp"
+        android:paddingTop="18dp"
         android:paddingEnd="20dp"
         android:paddingBottom="24dp">
 
-        <!-- Encabezado -->
-        <TextView
-            android:id="@+id/tvTitle"
+        <!-- Barra Superior Unificada: Logo + Título centrado + Selector de Tema -->
+        <LinearLayout
+            android:id="@+id/topHeaderBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/header_title"
-            android:textColor="@color/text_primary"
-            android:textSize="26sp"
-            android:textStyle="bold"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tvSubtitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/header_subtitle"
-            android:textColor="@color/accent_cyan"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+            <!-- Logo Oficial DetectIA -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivAppLogo"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_logo_card"
+                android:contentDescription="Logo DetectIA"
+                android:padding="2dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_detectia_logo"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Small" />
 
-        <TextView
-            android:id="@+id/tvModelStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_status_badge"
-            android:paddingStart="10dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="4dp"
-            android:text="@string/msg_loading_model"
-            android:textColor="@color/accent_emerald"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
+            <!-- Textos perfectamente alineados a la derecha del logo -->
+            <LinearLayout
+                android:id="@+id/headerTextLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
-        <!-- Cuadro de dibujo táctil centrado -->
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/google_sans"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.01"
+                    android:text="@string/header_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/google_sans_text"
+                    android:includeFontPadding="false"
+                    android:text="Reconocimiento de números"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Botón para Cambiar entre Modo Claro y Oscuro (Material 3 Pill con Ícono Vectorial) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnThemeToggle"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingStart="12dp"
+                android:paddingTop="0dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="0dp"
+                android:text="Oscuro"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:cornerRadius="999dp"
+                app:icon="@drawable/ic_mode_night"
+                app:iconSize="16dp"
+                app:iconTint="@color/text_primary"
+                app:strokeColor="@color/stroke_subtle"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
+
+        <!-- Cuadro de dibujo táctil (Google Translate Surface) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCanvas"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/black"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="6dp"
+            app:cardBackgroundColor="@color/bg_card"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvModelStatus"
+            app:layout_constraintTop_toBottomOf="@id/topHeaderBar"
             app:layout_constraintWidth_max="320dp"
-            app:strokeColor="@color/accent_cyan"
-            app:strokeWidth="2dp">
+            app:strokeColor="@color/stroke_subtle"
+            app:strokeWidth="1dp">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -91,6 +131,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:alpha="0.45"
+                    android:fontFamily="@font/google_sans_text"
                     android:importantForAccessibility="no"
                     android:text="@string/canvas_hint"
                     android:textColor="@color/text_secondary"
@@ -98,52 +139,55 @@
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Botones de acción -->
+        <!-- Botones de acción (Google Material 3 Pill) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClear"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="50dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
+            android:fontFamily="@font/google_sans_text"
             android:text="@string/btn_clear"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            app:cornerRadius="14dp"
+            android:textColor="@color/accent_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:cornerRadius="999dp"
             app:layout_constraintEnd_toStartOf="@id/btnPredict"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardCanvas"
             app:strokeColor="@color/stroke_subtle"
-            app:strokeWidth="1.5dp" />
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPredict"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="50dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/accent_indigo"
+            android:backgroundTint="@color/btn_primary_bg"
             android:enabled="false"
+            android:fontFamily="@font/google_sans_text"
             android:text="@string/btn_predict"
-            android:textColor="@color/white"
+            android:textColor="@color/btn_primary_text"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:cornerRadius="14dp"
+            app:cornerRadius="999dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1.5"
             app:layout_constraintStart_toEndOf="@id/btnClear"
             app:layout_constraintTop_toBottomOf="@id/cardCanvas" />
 
-        <!-- Panel de resultados -->
+        <!-- Panel de resultados Google Translate Elevated Container (#f0f4f9) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardResults"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/bg_card_elevated"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnPredict"
@@ -163,6 +207,7 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
+                    <!-- Caja con el Dígito Ganador -->
                     <LinearLayout
                         android:layout_width="86dp"
                         android:layout_height="86dp"
@@ -174,13 +219,15 @@
                             android:id="@+id/tvPredictedDigit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/google_sans"
                             android:includeFontPadding="false"
                             android:text="@string/placeholder_dash"
-                            android:textColor="@color/accent_cyan"
-                            android:textSize="48sp"
+                            android:textColor="@color/digit_text"
+                            android:textSize="50sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
+                    <!-- Métricas -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -192,6 +239,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/google_sans_text"
                             android:text="@string/label_prediction"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
@@ -201,8 +249,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
+                            android:fontFamily="@font/google_sans"
                             android:text="Seguridad: —"
-                            android:textColor="@color/accent_emerald"
+                            android:textColor="@color/accent_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -211,12 +260,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
+                            android:fontFamily="@font/roboto_mono"
                             android:text="Tiempo: —"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
 
-                    <!-- Vista previa 28x28 centrada -->
+                    <!-- Vista previa 28x28 -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -226,7 +276,7 @@
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="64dp"
                             android:layout_height="64dp"
-                            app:cardBackgroundColor="@color/black"
+                            app:cardBackgroundColor="@color/bg_card"
                             app:cardCornerRadius="10dp"
                             app:cardElevation="0dp"
                             app:strokeColor="@color/stroke_subtle"
@@ -244,6 +294,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
+                            android:fontFamily="@font/google_sans_text"
                             android:gravity="center"
                             android:text="@string/label_preview_28"
                             android:textColor="@color/text_secondary"
@@ -251,6 +302,7 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <!-- Divisor -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -258,9 +310,11 @@
                     android:layout_marginBottom="12dp"
                     android:background="@color/stroke_subtle" />
 
+                <!-- Título Sección Top 3 (Google Sans) -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/google_sans"
                     android:text="@string/label_top3"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp"
@@ -278,6 +332,7 @@
                         android:id="@+id/tvTop1Label"
                         android:layout_width="56dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/google_sans_text"
                         android:text="1° —"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
@@ -292,18 +347,19 @@
                         android:layout_weight="1"
                         android:max="1000"
                         android:progress="0"
-                        app:indicatorColor="@color/accent_emerald"
+                        app:indicatorColor="@color/rank_1_color"
                         app:trackColor="@color/track_progress"
-                        app:trackCornerRadius="6dp"
+                        app:trackCornerRadius="999dp"
                         app:trackThickness="10dp" />
 
                     <TextView
                         android:id="@+id/tvTop1Percent"
-                        android:layout_width="58dp"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_mono"
                         android:gravity="end"
                         android:text="0.0%"
-                        android:textColor="@color/accent_emerald"
+                        android:textColor="@color/rank_1_color"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -320,6 +376,7 @@
                         android:id="@+id/tvTop2Label"
                         android:layout_width="56dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/google_sans_text"
                         android:text="2° —"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
@@ -333,18 +390,19 @@
                         android:layout_weight="1"
                         android:max="1000"
                         android:progress="0"
-                        app:indicatorColor="@color/accent_cyan"
+                        app:indicatorColor="@color/rank_2_color"
                         app:trackColor="@color/track_progress"
-                        app:trackCornerRadius="6dp"
+                        app:trackCornerRadius="999dp"
                         app:trackThickness="8dp" />
 
                     <TextView
                         android:id="@+id/tvTop2Percent"
-                        android:layout_width="58dp"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_mono"
                         android:gravity="end"
                         android:text="0.0%"
-                        android:textColor="@color/text_secondary"
+                        android:textColor="@color/rank_2_color"
                         android:textSize="13sp" />
                 </LinearLayout>
 
@@ -360,6 +418,7 @@
                         android:id="@+id/tvTop3Label"
                         android:layout_width="56dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/google_sans_text"
                         android:text="3° —"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
@@ -373,15 +432,16 @@
                         android:layout_weight="1"
                         android:max="1000"
                         android:progress="0"
-                        app:indicatorColor="@color/accent_amber"
+                        app:indicatorColor="@color/rank_3_color"
                         app:trackColor="@color/track_progress"
-                        app:trackCornerRadius="6dp"
+                        app:trackCornerRadius="999dp"
                         app:trackThickness="8dp" />
 
                     <TextView
                         android:id="@+id/tvTop3Percent"
-                        android:layout_width="58dp"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_mono"
                         android:gravity="end"
                         android:text="0.0%"
                         android:textColor="@color/text_secondary"

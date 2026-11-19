@@ -3,73 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DetectIA — Reconocimiento de Dígitos Manuscritos</title>
+  <title>DetectIA — Laboratorio Multi-Modelo de Dígitos Manuscritos</title>
+  <link rel="icon" type="image/png" href="/static/img/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      /* Marca Tea Green */
-      --tea-green: #AFC49A;
-      --forest-green: #294635;
-      --deep-leaf: #4F7256;
-      --sage-green: #829B78;
-      --light-matcha: #DDE8C8;
+      /* Google Material 3 / translate-design Tokens */
+      --accent-primary: #0b57d0;
+      --color-danger: #d93025;
+      --color-warning: #f9ab00;
+      --color-info: #1a73e8;
 
-      /* Tema claro (predeterminado) */
-      --bg: #F7F8F1;
-      --surface: #FFFFFF;
-      --surface-2: #EEF2E8;
-      --text: #1E2A21;
-      --text-2: #5E6E5F;
-      --border: #D9E2D5;
-      --focus: #567B3B;
-      --hero-gradient: linear-gradient(180deg, #F7F8F1, #E8EFDF);
+      /* Google Translate: Blanco puro, azul Google y gris profesional */
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f0f4f9;        /* Gris-azul contenedor (panel derecho Translate) */
+      --surface-pill: #c2e7ff;     /* Píldora activa de Translate */
+      --on-surface-pill: #001d35;  /* Texto azul marino de píldora activa */
+      --text: #1f1f1f;
+      --text-2: #444746;           /* Gris profesional de etiquetas */
+      --text-3: #747775;
+      --border: #dadce0;           /* Borde característico Google */
+      --border-subtle: #e0e4eb;
+      --focus: #0b57d0;
+      --hero-gradient: #ffffff;
 
-      --primary: #294635;
-      --primary-hover: #1E3528;
-      --primary-text: #FFFFFF;
+      --primary: #0b57d0;
+      --primary-hover: #0842a0;
+      --primary-text: #ffffff;
 
       /* Estados */
-      --success: #337652;
-      --success-bg: rgba(51, 118, 82, 0.11);
-      --warning: #976719;
-      --error: #B44743;
-      --error-bg: rgba(180, 71, 67, 0.11);
-      --info: #3F7082;
+      --success: #1e8e3e;
+      --success-bg: rgba(30, 142, 62, 0.10);
+      --warning: #e37400;
+      --warning-bg: rgba(227, 116, 0, 0.10);
+      --error: #d93025;
+      --error-bg: rgba(217, 48, 37, 0.10);
+      --info: #0b57d0;
+      --info-bg: rgba(11, 87, 208, 0.10);
 
       /* Lienzo */
-      --canvas-bg: #FFFFFF;
-      --canvas-ink: #1E2A21;
-      --grid-line: rgba(30, 42, 33, 0.10);
-      --shadow: 0 2px 12px rgba(30, 42, 33, 0.05);
+      --canvas-bg: #ffffff;
+      --canvas-ink: #1f1f1f;
+      --grid-line: rgba(31, 31, 31, 0.08);
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
 
-      /* Tipografía */
-      --font-heading: "Space Grotesk", system-ui, sans-serif;
-      --font-body: "Inter", system-ui, sans-serif;
+      /* Tipografía Google Translate */
+      --font-heading: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-body: "Google Sans Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Roboto Mono", monospace;
     }
 
     [data-theme="dark"] {
-      --bg: #111A13;
-      --surface: #19241B;
-      --surface-2: #222F24;
-      --text: #F1F5EB;
-      --text-2: #B5C0B2;
-      --border: #334436;
-      --focus: #C2D7A3;
-      --hero-gradient: linear-gradient(180deg, #111A13, #17231A);
+      /* Modo Oscuro M3 */
+      --bg: #131314;
+      --surface: #1e1f20;
+      --surface-2: #282a2c;
+      --surface-pill: #004a77;
+      --on-surface-pill: #c2e7ff;
+      --text: #e3e3e3;
+      --text-2: #c4c7c5;
+      --text-3: #8e918f;
+      --border: #444746;
+      --border-subtle: #313335;
+      --focus: #a8c7fa;
+      --hero-gradient: #131314;
 
-      --primary: #C2D7A3;
-      --primary-hover: #D4E4BC;
-      --primary-text: #1E2A21;
+      --primary: #a8c7fa;
+      --primary-hover: #d2e3fc;
+      --primary-text: #041e49;
 
-      --success-bg: rgba(194, 215, 163, 0.14);
-      --error-bg: rgba(180, 71, 67, 0.18);
+      --success-bg: rgba(129, 201, 149, 0.16);
+      --warning-bg: rgba(253, 214, 99, 0.18);
+      --error-bg: rgba(242, 139, 130, 0.18);
+      --info-bg: rgba(138, 180, 248, 0.18);
 
-      --canvas-bg: #111A13;
-      --canvas-ink: #F1F5EB;
-      --grid-line: rgba(241, 245, 235, 0.10);
-      --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      --canvas-bg: #1e1f20;
+      --canvas-ink: #e3e3e3;
+      --grid-line: rgba(227, 227, 227, 0.08);
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
 
     * {
@@ -90,11 +104,11 @@
     .hero-band {
       background: var(--hero-gradient);
       border-bottom: 1px solid var(--border);
-      padding: 20px 16px;
+      padding: 22px 16px;
     }
 
     .container {
-      max-width: 1040px;
+      max-width: 1100px;
       margin: 0 auto;
     }
 
@@ -106,9 +120,26 @@
       gap: 16px;
     }
 
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      object-fit: cover;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
     .title-group h1 {
       font-family: var(--font-heading);
-      font-size: 1.75rem;
+      font-size: 1.8rem;
       font-weight: 700;
       letter-spacing: -0.02em;
       line-height: 1.15;
@@ -148,13 +179,14 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 999px;
-      padding: 6px 12px;
+      padding: 6px 14px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.15s ease;
     }
 
     .theme-toggle:hover {
@@ -165,24 +197,27 @@
       padding: 22px 16px 40px;
     }
 
-    /* Navegación por pestañas */
+    /* Pestañas Superiores Tipo Píldora Google Translate */
     .nav-tabs {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .tab-btn {
       background: var(--surface);
       color: var(--text-2);
       border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 9px 18px;
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      font-weight: 600;
+      border-radius: 9999px;
+      padding: 8px 20px;
+      font-family: var(--font-heading);
+      font-size: 0.88rem;
+      font-weight: 500;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       transition: all 0.15s ease;
     }
 
@@ -192,9 +227,68 @@
     }
 
     .tab-btn.active {
-      background: var(--primary);
-      color: var(--primary-text);
-      border-color: var(--primary);
+      background: var(--surface-pill);
+      color: var(--on-surface-pill);
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    /* Barra Subheader estilo Google Translate */
+    .model-selector-bar {
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px 0px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .model-selector-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-heading);
+    }
+
+    .model-chips-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .model-chip-btn {
+      background: transparent;
+      color: var(--text-2);
+      border: none;
+      border-bottom: 3px solid transparent;
+      border-radius: 3px 3px 0 0;
+      padding: 8px 16px;
+      font-family: var(--font-heading);
+      font-size: 0.86rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .model-chip-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .model-chip-btn.active {
+      background: transparent;
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
     }
 
     .tab-content {
@@ -205,15 +299,15 @@
       display: block;
     }
 
-    /* Layout de columnas */
+    /* Cuadrícula Principal Split Panel Google Translate */
     .grid-draw {
       display: grid;
-      grid-template-columns: 350px 1fr;
+      grid-template-columns: 360px 1fr;
       gap: 20px;
-      align-items: start;
+      align-items: stretch;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .grid-draw {
         grid-template-columns: 1fr;
       }
@@ -222,12 +316,30 @@
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      box-shadow: var(--shadow);
+      border-radius: 24px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      box-shadow: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .card.card-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .card.card-output {
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .card.card-output .card-title {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--text-2);
     }
 
     .card-header {
@@ -245,16 +357,17 @@
     }
 
     .chip {
-      background: var(--surface-2);
+      background: var(--surface);
       color: var(--text-2);
       border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 3px 10px;
+      padding: 3px 12px;
       font-size: 0.75rem;
       font-weight: 500;
+      font-family: var(--font-heading);
     }
 
-    /* Lienzo */
+    /* Área del Lienzo */
     .canvas-area {
       display: flex;
       flex-direction: column;
@@ -268,7 +381,7 @@
       max-width: 280px;
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 9999px;
       padding: 3px;
       gap: 4px;
     }
@@ -277,17 +390,18 @@
       flex: 1;
       background: transparent;
       border: none;
-      border-radius: 6px;
+      border-radius: 9999px;
       padding: 6px 8px;
       font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-2);
       cursor: pointer;
+      font-family: var(--font-heading);
     }
 
     .mode-opt.active {
       background: var(--surface);
-      color: var(--text);
+      color: var(--primary);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
@@ -296,7 +410,7 @@
       height: 280px;
       background-color: var(--canvas-bg);
       border: 1.5px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       touch-action: none;
       cursor: crosshair;
       transition: border-color 0.15s ease;
@@ -313,8 +427,8 @@
       gap: 6px;
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 4px 8px;
+      border-radius: 9999px;
+      padding: 4px 10px;
       font-size: 0.82rem;
       color: var(--text-2);
     }
@@ -324,10 +438,11 @@
       border: none;
       color: var(--text-2);
       padding: 4px 10px;
-      border-radius: 6px;
+      border-radius: 9999px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
+      font-family: var(--font-heading);
     }
 
     .stroke-btn.active {
@@ -345,13 +460,13 @@
     button.btn {
       flex: 1;
       border: 1px solid transparent;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-family: var(--font-body);
+      border-radius: 9999px;
+      padding: 10px 18px;
+      font-family: var(--font-heading);
       font-size: 0.88rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.15s ease, transform 0.08s ease;
+      transition: background-color 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
     }
 
     button.btn:active {
@@ -361,30 +476,25 @@
     .btn-primary {
       background: var(--primary);
       color: var(--primary-text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary:hover {
       background: var(--primary-hover);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
-    .btn-secondary {
-      background: var(--surface-2);
-      color: var(--text);
+    .btn-secondary,
+    .btn-outline-danger {
+      background: var(--surface);
+      color: var(--primary);
       border-color: var(--border) !important;
     }
 
-    .btn-secondary:hover {
-      background: var(--border);
-    }
-
-    .btn-outline-danger {
-      background: transparent;
-      color: var(--error);
-      border-color: rgba(180, 71, 67, 0.35) !important;
-    }
-
+    .btn-secondary:hover,
     .btn-outline-danger:hover {
-      background: var(--error-bg);
+      background: var(--surface-2);
+      color: var(--primary-hover);
     }
 
     .check-label {
@@ -403,108 +513,171 @@
       height: 15px;
     }
 
-    /* Panel de resultados y Cuadrícula 28x28 */
-    .result-grid {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 20px;
+    /* Banners de Veredicto / Comparación */
+    .verdict-banner {
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .verdict-banner.agree {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(51, 118, 82, 0.3);
+    }
+
+    .verdict-banner.disagree {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid rgba(151, 103, 25, 0.3);
+    }
+
+    .verdict-banner.idle {
+      background: var(--surface-2);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+
+    /* Bloque de Inspección 28x28 */
+    .preview-inspection-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 18px;
+      padding: 14px 18px;
     }
 
-    @media (max-width: 560px) {
-      .result-grid {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        text-align: center;
-      }
-    }
-
-    .prediction-card {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 12px;
-      text-align: center;
-    }
-
-    .prediction-card .lbl {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-2);
-      font-weight: 600;
-    }
-
-    .prediction-card .val {
-      font-family: var(--font-heading);
-      font-size: 4rem;
-      font-weight: 700;
-      line-height: 1.05;
-      color: var(--primary);
-      margin: 6px 0;
-    }
-
-    .prediction-card .conf {
-      display: inline-block;
-      background: var(--light-matcha);
-      color: #1E2A21;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 999px;
-    }
-
-    [data-theme="dark"] .prediction-card .conf {
-      background: var(--surface-2);
-      color: var(--tea-green);
-      border: 1px solid var(--border);
-    }
-
-    .preview-28-box {
+    .preview-info {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 8px;
+      gap: 4px;
     }
 
-    .preview-28-box span {
-      font-size: 0.8rem;
+    .preview-info .title {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
       font-weight: 600;
+      color: var(--text);
+    }
+
+    .preview-info .desc {
+      font-size: 0.78rem;
       color: var(--text-2);
     }
 
     canvas#gridCanvas {
-      width: 196px;
-      height: 196px;
+      width: 84px;
+      height: 84px;
       background-color: var(--canvas-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       image-rendering: pixelated;
     }
 
-    .preview-28-box small {
-      font-size: 0.74rem;
-      color: var(--text-2);
+    /* Cuadrícula Comparativa Dúo (Side-by-Side Cards) */
+    .duo-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
     }
 
-    /* Barras de afinidad */
+    .model-result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+
+    .model-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .model-card-name {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .model-card-family {
+      font-size: 0.75rem;
+      color: var(--text-2);
+      margin-top: 2px;
+    }
+
+    .model-big-digit-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .model-big-digit {
+      font-family: var(--font-heading);
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--primary);
+    }
+
+    .model-meta-row {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      font-size: 0.78rem;
+      color: var(--text-2);
+      border-top: 1px dashed var(--border);
+      padding-top: 6px;
+      margin-top: 4px;
+    }
+
+    .model-meta-row strong {
+      color: var(--text);
+    }
+
+    /* Barras de Afinidad */
+    .affinity-section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
     .bars-list {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 5px;
     }
 
     .bar-row {
       display: grid;
-      grid-template-columns: 24px 1fr 56px;
+      grid-template-columns: 20px 1fr 48px;
       align-items: center;
-      gap: 10px;
-      font-size: 0.85rem;
+      gap: 8px;
+      font-size: 0.8rem;
     }
 
     .bar-digit {
@@ -516,11 +689,11 @@
 
     .bar-digit.winner {
       color: var(--primary);
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     .bar-track {
-      height: 10px;
+      height: 8px;
       background: var(--surface-2);
       border-radius: 999px;
       overflow: hidden;
@@ -529,20 +702,22 @@
 
     .bar-fill {
       height: 100%;
-      background: var(--tea-green);
+      background: var(--primary);
+      opacity: 0.35;
       border-radius: 999px;
       transition: width 0.22s ease;
     }
 
     .bar-fill.winner {
       background: var(--primary);
+      opacity: 1;
     }
 
     .bar-pct {
       text-align: right;
       font-variant-numeric: tabular-nums;
       color: var(--text-2);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
     }
 
     .bar-pct.winner {
@@ -550,19 +725,19 @@
       font-weight: 700;
     }
 
-    /* Explorador */
+    /* Pestaña Explorador */
     .explorer-toolbar {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 18px;
+      border-radius: 9999px;
+      padding: 10px 20px;
       margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      box-shadow: var(--shadow);
+      box-shadow: none;
     }
 
     .index-form {
@@ -573,9 +748,9 @@
     }
 
     input[type="number"] {
-      width: 104px;
-      padding: 8px 10px;
-      border-radius: 8px;
+      width: 100px;
+      padding: 8px 12px;
+      border-radius: 9999px;
       border: 1px solid var(--border);
       background: var(--surface-2);
       color: var(--text);
@@ -590,51 +765,51 @@
       border-color: transparent;
     }
 
-    .comparison-boxes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+    canvas#datasetCanvas {
+      width: 280px;
+      height: 280px;
+      background-color: var(--canvas-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      image-rendering: pixelated;
     }
 
-    .digit-box {
-      background: var(--surface-2);
+    .explorer-ground-truth-card {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      text-align: center;
-    }
-
-    .digit-box .label {
-      font-size: 0.78rem;
-      color: var(--text-2);
-      font-weight: 500;
-    }
-
-    .digit-box .number {
-      font-family: var(--font-heading);
-      font-size: 2.8rem;
-      font-weight: 700;
-      line-height: 1.1;
-      margin-top: 4px;
-    }
-
-    .status-banner {
+      border-radius: 16px;
+      padding: 14px 18px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.88rem;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
-    .status-banner.ok {
+    .ground-truth-val {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .badge-verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+
+    .badge-verdict.correct {
       background: var(--success-bg);
       color: var(--success);
       border: 1px solid rgba(51, 118, 82, 0.3);
     }
 
-    .status-banner.err {
+    .badge-verdict.incorrect {
       background: var(--error-bg);
       color: var(--error);
       border: 1px solid rgba(180, 71, 67, 0.3);
@@ -646,30 +821,25 @@
       font-weight: 500;
       display: none;
     }
-
-    canvas#datasetCanvas {
-      width: 280px;
-      height: 280px;
-      background-color: var(--canvas-bg);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      image-rendering: pixelated;
-    }
   </style>
 </head>
 <body>
+  <!-- BANDA HERO SUPERIOR -->
   <div class="hero-band">
     <div class="container">
       <header>
-        <div class="title-group">
-          <h1>DetectIA — Clasificador de Dígitos</h1>
-          <p>Reconocimiento de escritura manuscrita en malla de 28 × 28 píxeles mediante SVM</p>
+        <div class="brand-group">
+          <img src="/static/img/logo.png" alt="DetectIA Logo" class="brand-logo" />
+          <div class="title-group">
+            <h1>DetectIA — Laboratorio Multi-Modelo</h1>
+            <p>Plataforma comparativa de IA: SVM Lineal vs Red Neuronal en MNIST (28 × 28)</p>
+          </div>
         </div>
         <div class="header-right">
-          <div class="stat-pill">Modelo: <strong>{{ resumen.modelo }}</strong></div>
-          <div class="stat-pill">Precisión test: <strong>{{ resumen.accuracy_pct }}%</strong></div>
-          <div class="stat-pill">Muestras: <strong>{{ resumen.total_prueba }}</strong></div>
-          <button type="button" class="theme-toggle" id="btnTheme" title="Cambiar tema claro/oscuro">
+          <div class="stat-pill">Modelos: <strong>{{ resumen.total_modelos }} activos</strong></div>
+          <div class="stat-pill">Test set: <strong>{{ resumen.total_prueba }} muestras</strong></div>
+          <div class="stat-pill">Discrepancias: <strong>{{ resumen.discrepancias }}</strong></div>
+          <button type="button" class="theme-toggle" id="btnTheme" title="Alternar tema claro/oscuro">
             Tema oscuro
           </button>
         </div>
@@ -678,19 +848,43 @@
   </div>
 
   <div class="container main-wrap">
+
+    <!-- PESTAÑAS PRINCIPALES TIPO PÍLDORA GOOGLE TRANSLATE -->
     <nav class="nav-tabs">
       <button type="button" class="tab-btn active" id="tabBtnDraw" onclick="cambiarPestana('draw')">
-        Dibujar en vivo
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        <span>Dibujar en vivo</span>
       </button>
       <button type="button" class="tab-btn" id="tabBtnExplorer" onclick="cambiarPestana('explorer')">
-        Explorador de muestras ({{ resumen.total_prueba }})
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span>Explorador de dataset ({{ resumen.total_prueba }})</span>
       </button>
     </nav>
 
-    <!-- PESTAÑA 1: DIBUJO EN VIVO -->
+    <!-- SELECTOR DE MODELO / SUBHEADER ESTILO TRANSLATE CON INDICADOR SUBRAYADO -->
+    <div class="model-selector-bar">
+      <div class="model-selector-label">
+        <span>Inferencia:</span>
+      </div>
+      <div class="model-chips-group" id="modelChipsContainer">
+        <button type="button" class="model-chip-btn active" data-model="ambos" onclick="seleccionarModoModelo('ambos')">
+          <span>Modo Dúo (Comparar Ambos)</span>
+        </button>
+        {% for m in modelos %}
+        <button type="button" class="model-chip-btn" data-model="{{ m.id }}" onclick="seleccionarModoModelo('{{ m.id }}')">
+          <span>{{ m.nombre }} ({{ m.accuracy_pct }}%)</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PESTAÑA 1: DIBUJAR EN VIVO                                            -->
+    <!-- ===================================================================== -->
     <main class="tab-content active" id="viewDraw">
       <div class="grid-draw">
-        <section class="card">
+        <!-- PANEL IZQUIERDO: LIENZO (BLANCO PURO) -->
+        <section class="card card-input">
           <div class="card-header">
             <h2 class="card-title">Lienzo de entrada</h2>
             <span class="chip">Táctil / Mouse</span>
@@ -698,8 +892,8 @@
 
           <div class="canvas-area">
             <div class="mode-switch">
-              <button type="button" class="mode-opt active" id="modeLibre" onclick="setModoDibujo('libre')">Trazo libre</button>
-              <button type="button" class="mode-opt" id="modeGrid" onclick="setModoDibujo('grid')">Cuadrícula 28×28</button>
+              <button type="button" class="mode-opt active" id="modeLibre" onclick="setModoDibujo('libre')">Trazo libre HD</button>
+              <button type="button" class="mode-opt" id="modeGrid" onclick="setModoDibujo('grid')">Malla 28×28</button>
             </div>
 
             <canvas id="drawCanvas" width="280" height="280"></canvas>
@@ -718,67 +912,77 @@
 
             <label class="check-label">
               <input type="checkbox" id="chkAutoPredict" checked />
-              Predecir automáticamente al finalizar el trazo
+              Inferencia automática al soltar trazo
             </label>
             <div class="error-toast" id="drawErrorMsg"></div>
           </div>
         </section>
 
-        <section class="card">
+        <!-- PANEL DERECHO: RESULTADOS (CONTENEDOR #f0f4f9 GOOGLE TRANSLATE) -->
+        <section class="card card-output">
           <div class="card-header">
-            <h2 class="card-title">Resultado e Inspección 28 × 28</h2>
-            <span class="chip" id="drawLatencyBadge">Listo</span>
+            <h2 class="card-title" id="drawSectionTitle">Evaluación Comparativa en Vivo</h2>
+            <span class="chip" id="drawOverallLatency">Listo</span>
           </div>
 
-          <div class="result-grid">
-            <div class="prediction-card">
-              <div class="lbl">Dígito predicho</div>
-              <div class="val" id="drawPredictedDigit">—</div>
-              <div class="conf" id="drawConfidenceBadge">Esperando trazo</div>
-            </div>
-
-            <div class="preview-28-box">
-              <span>Entrada normalizada (28 × 28 px)</span>
-              <canvas id="gridCanvas" width="280" height="280"></canvas>
-              <small>Centrado por centro de masa MNIST</small>
-            </div>
+          <!-- VEREDICTO GENERAL / COMPARATIVO -->
+          <div class="verdict-banner idle" id="drawVerdictBanner">
+            <span id="drawVerdictText">Dibuja un dígito en el lienzo para iniciar la clasificación simultánea.</span>
           </div>
 
-          <div>
-            <div class="card-header" style="margin-bottom: 10px;">
-              <h3 class="card-title" style="font-size: 0.92rem;">Afinidad por clase (0 al 9)</h3>
+          <!-- INSPECCIÓN MATRIZ 28x28 PREPROCESADA -->
+          <div class="preview-inspection-row">
+            <div class="preview-info">
+              <span class="title">Entrada normalizada (28 × 28 px)</span>
+              <span class="desc">Alineación por centro de masa MNIST + interpolación Lanczos</span>
             </div>
-            <div class="bars-list" id="drawBarsContainer"></div>
+            <canvas id="gridCanvas" width="280" height="280"></canvas>
+          </div>
+
+          <!-- CONTENEDOR DE TARJETAS DE MODELOS (DÚO O INDIVIDUAL) -->
+          <div class="duo-cards-grid" id="drawModelsContainer">
+            <!-- Rellenado dinámicamente por JavaScript -->
           </div>
         </section>
       </div>
     </main>
 
-    <!-- PESTAÑA 2: EXPLORADOR DEL DATASET -->
+    <!-- ===================================================================== -->
+    <!-- PESTAÑA 2: EXPLORADOR DEL DATASET TEST                                -->
+    <!-- ===================================================================== -->
     <main class="tab-content" id="viewExplorer">
+      <!-- BARRA DE HERRAMIENTAS DEL EXPLORADOR -->
       <section class="explorer-toolbar">
         <form class="index-form" id="formIndice">
           <label for="inputIndice" style="font-size: 0.86rem; color: var(--text-2); font-weight: 500;">
             Índice (0 – {{ resumen.total_prueba - 1 }}):
           </label>
           <button type="button" class="btn btn-secondary" style="flex: 0; padding: 8px 12px;" id="btnPrev">◀</button>
-          <input type="number" id="inputIndice" min="0" max="{{ resumen.total_prueba - 1 }}" value="1100" required />
+          <input type="number" id="inputIndice" min="0" max="{{ resumen.total_prueba - 1 }}" value="20" required />
           <button type="button" class="btn btn-secondary" style="flex: 0; padding: 8px 12px;" id="btnNext">▶</button>
           <button type="submit" class="btn btn-primary" style="flex: 0; padding: 8px 14px;">Consultar</button>
           <span class="error-toast" id="explorerErrorMsg"></span>
         </form>
 
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn btn-secondary" style="flex: 0;" id="btnAleatorio">Muestra aleatoria</button>
-          <button type="button" class="btn btn-secondary" style="flex: 0; color: var(--warning);" id="btnSiguienteError">Siguiente error</button>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <button type="button" class="btn btn-secondary" style="flex: 0;" id="btnAleatorio">
+            <span>Aleatorio</span>
+          </button>
+          <button type="button" class="btn btn-secondary" style="flex: 0; color: var(--warning); border-color: rgba(151,103,25,0.4) !important;" id="btnSiguienteDiscrepancia" title="Muestra donde SVM y Red Neuronal predicen diferente">
+            <span>Siguiente Discrepancia ({{ resumen.discrepancias }})</span>
+          </button>
+          <button type="button" class="btn btn-secondary" style="flex: 0; color: var(--error); border-color: rgba(180,71,67,0.4) !important;" id="btnSiguienteError">
+            <span>Siguiente Error</span>
+          </button>
         </div>
       </section>
 
       <div class="grid-draw">
-        <section class="card">
+        <!-- COLUMNA IZQUIERDA: MATRIZ DE LA MUESTRA (BLANCO PURO) -->
+        <section class="card card-input">
           <div class="card-header">
-            <h2 class="card-title">Muestra #<span id="lblIndiceActual">1100</span></h2>
-            <span class="chip">MNIST Test</span>
+            <h2 class="card-title">Muestra #<span id="lblIndiceActual">20</span></h2>
+            <span class="chip">Conjunto Test</span>
           </div>
 
           <div class="canvas-area">
@@ -792,32 +996,34 @@
           </div>
         </section>
 
-        <section class="card">
+        <!-- COLUMNA DERECHA: EVALUACIÓN FRENTE AL VALOR REAL (#f0f4f9 CONTENEDOR) -->
+        <section class="card card-output">
           <div class="card-header">
-            <h2 class="card-title">Evaluación del modelo</h2>
+            <h2 class="card-title">Veredicto y Comparativa de Inferencia</h2>
+            <span class="chip" id="explorerLatency">Listo</span>
           </div>
 
-          <div class="comparison-boxes">
-            <div class="digit-box">
-              <div class="label">Valor real</div>
-              <div class="number" id="valReal">—</div>
+          <!-- TARJETA DEL VALOR REAL -->
+          <div class="explorer-ground-truth-card">
+            <div>
+              <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); font-weight: 600;">
+                Etiqueta Real (Ground Truth)
+              </span>
+              <div style="font-size: 0.85rem; color: var(--text-2); margin-top: 2px;">
+                Dígito manuscrito original verificado
+              </div>
             </div>
-            <div class="digit-box">
-              <div class="label">Predicción SVM</div>
-              <div class="number" id="valPred">—</div>
-            </div>
+            <div class="ground-truth-val" id="explorerRealVal">—</div>
           </div>
 
-          <div class="status-banner ok" id="statusBanner">
-            <span id="statusText">Cargando...</span>
-            <span id="latencyText" style="font-size: 0.8rem;"></span>
+          <!-- BANNER COMPARATIVO -->
+          <div class="verdict-banner idle" id="explorerVerdictBanner">
+            <span id="explorerVerdictText">Cargando evaluación...</span>
           </div>
 
-          <div>
-            <div class="card-header" style="margin-bottom: 10px;">
-              <h3 class="card-title" style="font-size: 0.92rem;">Afinidad por clase</h3>
-            </div>
-            <div class="bars-list" id="explorerBarsContainer"></div>
+          <!-- TARJETAS DE EVALUACIÓN MULTI-MODELO -->
+          <div class="duo-cards-grid" id="explorerModelsContainer">
+            <!-- Rellenado dinámicamente por JavaScript -->
           </div>
         </section>
       </div>
@@ -826,20 +1032,24 @@
 
   <script>
     const TOTAL_MUESTRAS = {{ resumen.total_prueba }};
+    let modeloActivo = "ambos"; // 'ambos', 'svm', 'cnn', etc.
     let grosorTrazo = 22;
     let modoDibujo = "libre"; // 'libre' o 'grid'
     let haDibujado = false;
     let gridManual = new Uint8Array(784);
     let ultimosPixelesProcesados = null;
     let ultimosPixelesExplorer = [];
+    let indiceActual = 20;
 
-    // --- Tema Claro / Oscuro (Tea Green) ---
+    // Metadatos de modelos inyectados desde el backend
+    const MODELOS_INFO = {{ modelos | tojson }};
+
+    // --- TEMA CLARO / OSCURO (TEA GREEN) ---
     const btnTheme = document.getElementById("btnTheme");
     function aplicarTema(oscuro) {
       document.documentElement.setAttribute("data-theme", oscuro ? "dark" : "light");
       btnTheme.textContent = oscuro ? "Tema claro" : "Tema oscuro";
       localStorage.setItem("detectia-theme", oscuro ? "dark" : "light");
-      // Redibujar vistas con la tinta del tema actual
       if (modoDibujo === "grid") {
         dibujarGridManualEnCanvas();
       } else {
@@ -862,7 +1072,20 @@
       return getComputedStyle(document.documentElement).getPropertyValue("--grid-line").trim() || "rgba(30,42,33,0.1)";
     }
 
-    // --- Pestañas ---
+    // --- SELECTOR DE MODO / MODELO ---
+    function seleccionarModoModelo(mId) {
+      modeloActivo = mId;
+      document.querySelectorAll(".model-chip-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-model") === mId);
+      });
+      // Si ya hay un dibujo o muestra cargada, re-predecir con el nuevo filtro
+      if (haDibujado) {
+        enviarPrediccionDibujo();
+      }
+      cargarMuestraExplorer(indiceActual);
+    }
+
+    // --- PESTAÑAS ---
     function cambiarPestana(p) {
       document.getElementById("tabBtnDraw").classList.toggle("active", p === "draw");
       document.getElementById("tabBtnExplorer").classList.toggle("active", p === "explorer");
@@ -870,13 +1093,12 @@
       document.getElementById("viewExplorer").classList.toggle("active", p === "explorer");
     }
 
-    // --- Lienzo de Dibujo ---
+    // --- LIENZO DE DIBUJO ---
     const drawCanvas = document.getElementById("drawCanvas");
     const drawCtx = drawCanvas.getContext("2d", { willReadFrequently: true });
     const gridCanvas = document.getElementById("gridCanvas");
     const gridCtx = gridCanvas.getContext("2d");
 
-    // Capa oculta que guarda exclusivamente la tinta pura (fondo transparente)
     const inkCanvas = document.createElement("canvas");
     inkCanvas.width = 280;
     inkCanvas.height = 280;
@@ -912,11 +1134,12 @@
       }
       limpiarGridCanvas();
 
-      document.getElementById("drawPredictedDigit").textContent = "—";
-      document.getElementById("drawConfidenceBadge").textContent = "Esperando trazo";
-      document.getElementById("drawLatencyBadge").textContent = "Listo";
+      const banner = document.getElementById("drawVerdictBanner");
+      banner.className = "verdict-banner idle";
+      document.getElementById("drawVerdictText").textContent = "Dibuja un dígito en el lienzo para iniciar la clasificación simultánea.";
+      document.getElementById("drawOverallLatency").textContent = "Listo";
       document.getElementById("drawErrorMsg").style.display = "none";
-      renderizarBarras("drawBarsContainer", [0,0,0,0,0,0,0,0,0,0], -1);
+      document.getElementById("drawModelsContainer").innerHTML = "";
     }
 
     function limpiarGridCanvas() {
@@ -983,7 +1206,6 @@
       const fila = Math.floor(y / 10);
       if (col < 0 || col >= 28 || fila < 0 || fila >= 28) return;
 
-      // Pintar centro al 100% y suavizado ligero en vecinos directos (estilo MNIST)
       const setMax = (f, c, v) => {
         if (f >= 0 && f < 28 && c >= 0 && c < 28) {
           const idx = f * 28 + c;
@@ -1071,28 +1293,29 @@
     document.getElementById("btnClearDraw").addEventListener("click", limpiarLienzo);
     document.getElementById("btnPredictDraw").addEventListener("click", enviarPrediccionDibujo);
 
+    // --- ENVÍO DE PREDICCIÓN (DIBUJO EN VIVO) ---
     async function enviarPrediccionDibujo() {
       const errorDiv = document.getElementById("drawErrorMsg");
       errorDiv.style.display = "none";
 
       if (!haDibujado) {
-        errorDiv.textContent = "El lienzo está vacío. Dibuja un dígito antes de reconocer.";
+        errorDiv.textContent = "El lienzo está vacío. Dibuja un dígito antes de predecir.";
         errorDiv.style.display = "block";
         return;
       }
 
-      let payload;
+      let payload = { modelo_id: modeloActivo };
       if (modoDibujo === "grid") {
         const suma = gridManual.reduce((a, b) => a + b, 0);
         if (suma === 0) {
-          errorDiv.textContent = "La cuadrícula está vacía. Dibuja un número.";
+          errorDiv.textContent = "La cuadrícula está vacía.";
           errorDiv.style.display = "block";
           return;
         }
-        payload = { pixeles: Array.from(gridManual), ya_centrado: false };
+        payload.pixeles = Array.from(gridManual);
+        payload.ya_centrado = false;
       } else {
-        // Enviamos la imagen HD (280x280) en base64 con fondo transparente para máxima precisión
-        payload = { imagen_base64: inkCanvas.toDataURL("image/png") };
+        payload.imagen_base64 = inkCanvas.toDataURL("image/png");
       }
 
       try {
@@ -1109,17 +1332,92 @@
           return;
         }
 
-        document.getElementById("drawPredictedDigit").textContent = data.prediccion;
-        document.getElementById("drawConfidenceBadge").textContent = `${data.confianza}% de afinidad`;
-        document.getElementById("drawLatencyBadge").textContent = `${data.latencia_ms} ms`;
-
         ultimosPixelesProcesados = data.pixeles_procesados;
         renderizarGridCanvas(data.pixeles_procesados);
-        renderizarBarras("drawBarsContainer", data.puntajes, data.prediccion);
+        actualizarUIResultadosDibujo(data);
       } catch (err) {
-        errorDiv.textContent = "Error conectando con el servidor Flask.";
+        errorDiv.textContent = "Error de conexión con el servidor.";
         errorDiv.style.display = "block";
       }
+    }
+
+    function actualizarUIResultadosDibujo(data) {
+      const modelos = data.modelos || {};
+      const keys = Object.keys(modelos);
+      const banner = document.getElementById("drawVerdictBanner");
+      const verdictText = document.getElementById("drawVerdictText");
+      const container = document.getElementById("drawModelsContainer");
+      container.innerHTML = "";
+
+      let totalLatency = 0;
+      keys.forEach(k => { totalLatency += modelos[k].latencia_ms || 0; });
+      document.getElementById("drawOverallLatency").textContent = `Latencia: ${totalLatency.toFixed(1)} ms`;
+
+      if (keys.length >= 2) {
+        const m1 = modelos[keys[0]];
+        const m2 = modelos[keys[1]];
+        if (m1.prediccion === m2.prediccion) {
+          banner.className = "verdict-banner agree";
+          verdictText.innerHTML = `<strong>Consenso:</strong> Ambos modelos coinciden en el dígito <strong>${m1.prediccion}</strong> (${m1.confianza}% vs ${m2.confianza}% afinidad).`;
+        } else {
+          banner.className = "verdict-banner disagree";
+          verdictText.innerHTML = `<strong>Discrepancia detectada:</strong> ${m1.nombre} predice <strong>${m1.prediccion}</strong> (${m1.confianza}%) mientras que ${m2.nombre} predice <strong>${m2.prediccion}</strong> (${m2.confianza}%).`;
+        }
+      } else if (keys.length === 1) {
+        const m = modelos[keys[0]];
+        banner.className = "verdict-banner agree";
+        verdictText.innerHTML = `<strong>${m.nombre}:</strong> Dígito predicho <strong>${m.prediccion}</strong> con ${m.confianza}% de confianza.`;
+      }
+
+      // Renderizar tarjetas de modelos
+      keys.forEach(k => {
+        const mod = modelos[k];
+        container.appendChild(crearTarjetaModelo(mod, false));
+      });
+    }
+
+    function crearTarjetaModelo(mod, mostrarAcierto = false) {
+      const card = document.createElement("div");
+      card.className = "model-result-card";
+
+      let aciertoBadge = "";
+      if (mostrarAcierto && typeof mod.acierto === "boolean") {
+        aciertoBadge = mod.acierto
+          ? `<span class="badge-verdict correct">✅ Acierto</span>`
+          : `<span class="badge-verdict incorrect">❌ Fallo</span>`;
+      }
+
+      card.innerHTML = `
+        <div class="model-card-header">
+          <div>
+            <div class="model-card-name">${mod.nombre}</div>
+            <div class="model-card-family">${mod.familia || "Clasificador"}</div>
+          </div>
+          ${aciertoBadge}
+        </div>
+        <div class="model-big-digit-box">
+          <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-2); font-weight:600;">Predicción</span>
+          <div class="model-big-digit">${mod.prediccion}</div>
+          <div class="model-meta-row">
+            <span>Afinidad: <strong>${mod.confianza}%</strong></span>
+            <span>Latencia: <strong>${mod.latencia_ms} ms</strong></span>
+          </div>
+        </div>
+        <div>
+          <div class="affinity-section-title">Distribución de Afinidades (0–9)</div>
+          <div class="bars-list" id="bars_${mod.id}"></div>
+        </div>
+      `;
+
+      // Insertar barras
+      setTimeout(() => {
+        const bContainer = card.querySelector(`#bars_${mod.id}`);
+        if (bContainer && mod.puntajes) {
+          renderizarBarrasEnElemento(bContainer, mod.puntajes, mod.prediccion);
+        }
+      }, 0);
+
+      return card;
     }
 
     function renderizarGridCanvas(pixeles) {
@@ -1142,10 +1440,8 @@
       dibujarLineasCuadricula(gridCtx, 280, 28);
     }
 
-    function renderizarBarras(containerId, puntajes, ganador) {
-      const container = document.getElementById(containerId);
+    function renderizarBarrasEnElemento(container, puntajes, ganador) {
       container.innerHTML = "";
-
       puntajes.forEach((pct, digito) => {
         const esGanador = digito === ganador;
         const row = document.createElement("div");
@@ -1161,7 +1457,7 @@
       });
     }
 
-    // --- Explorador de Dataset ---
+    // --- EXPLORADOR DE DATASET ---
     const datasetCanvas = document.getElementById("datasetCanvas");
     const datasetCtx = datasetCanvas.getContext("2d");
     const inputIndice = document.getElementById("inputIndice");
@@ -1195,8 +1491,9 @@
 
     async function cargarMuestraExplorer(idx) {
       explorerErrorMsg.style.display = "none";
+      indiceActual = idx;
       try {
-        const res = await fetch(`/api/muestra/${idx}`);
+        const res = await fetch(`/api/muestra/${idx}?modelo=${modeloActivo}`);
         const data = await res.json();
         if (!res.ok) {
           explorerErrorMsg.textContent = data.error || "Error al consultar.";
@@ -1206,28 +1503,59 @@
 
         inputIndice.value = data.indice;
         document.getElementById("lblIndiceActual").textContent = data.indice;
-        document.getElementById("valReal").textContent = data.valor_real;
-        document.getElementById("valPred").textContent = data.prediccion;
-
-        const banner = document.getElementById("statusBanner");
-        const statusText = document.getElementById("statusText");
-        const latencyText = document.getElementById("latencyText");
-
-        if (data.acierto) {
-          banner.className = "status-banner ok";
-          statusText.textContent = "Acierto — Clasificación correcta";
-        } else {
-          banner.className = "status-banner err";
-          statusText.textContent = `Error — Valor real ${data.valor_real}, predicho ${data.prediccion}`;
-        }
-        latencyText.textContent = `${data.latencia_ms} ms`;
+        document.getElementById("explorerRealVal").textContent = data.valor_real;
 
         renderizarMuestraExplorer(data.pixeles);
-        renderizarBarras("explorerBarsContainer", data.puntajes, data.prediccion);
+        actualizarUIResultadosExplorer(data);
       } catch (err) {
         explorerErrorMsg.textContent = "Error de conexión con el servidor.";
         explorerErrorMsg.style.display = "inline";
       }
+    }
+
+    function actualizarUIResultadosExplorer(data) {
+      const modelos = data.modelos || {};
+      const keys = Object.keys(modelos);
+      const banner = document.getElementById("explorerVerdictBanner");
+      const verdictText = document.getElementById("explorerVerdictText");
+      const container = document.getElementById("explorerModelsContainer");
+      container.innerHTML = "";
+
+      let totalLatency = 0;
+      keys.forEach(k => { totalLatency += modelos[k].latencia_ms || 0; });
+      document.getElementById("explorerLatency").textContent = `Latencia: ${totalLatency.toFixed(1)} ms`;
+
+      if (keys.length >= 2) {
+        const m1 = modelos[keys[0]];
+        const m2 = modelos[keys[1]];
+        if (m1.acierto && m2.acierto) {
+          banner.className = "verdict-banner agree";
+          verdictText.innerHTML = `<strong>Éxito conjunto:</strong> Ambos modelos clasificaron correctamente el dígito <strong>${data.valor_real}</strong>.`;
+        } else if (m1.acierto && !m2.acierto) {
+          banner.className = "verdict-banner disagree";
+          verdictText.innerHTML = `<strong>Discrepancia:</strong> <strong>${m1.nombre}</strong> acertó (${m1.prediccion}), pero <strong>${m2.nombre}</strong> falló (predijo ${m2.prediccion}).`;
+        } else if (!m1.acierto && m2.acierto) {
+          banner.className = "verdict-banner disagree";
+          verdictText.innerHTML = `<strong>Discrepancia:</strong> <strong>${m2.nombre}</strong> acertó (${m2.prediccion}), pero <strong>${m1.nombre}</strong> falló (predijo ${m1.prediccion}).`;
+        } else {
+          banner.className = "verdict-banner disagree";
+          verdictText.innerHTML = `<strong>Ambos modelos difieren del valor real:</strong> Valor real es <strong>${data.valor_real}</strong>. Predicciones: ${m1.prediccion} y ${m2.prediccion}.`;
+        }
+      } else if (keys.length === 1) {
+        const m = modelos[keys[0]];
+        if (m.acierto) {
+          banner.className = "verdict-banner agree";
+          verdictText.innerHTML = `<strong>${m.nombre}:</strong> Clasificación correcta del dígito <strong>${data.valor_real}</strong>.`;
+        } else {
+          banner.className = "verdict-banner disagree";
+          verdictText.innerHTML = `<strong>${m.nombre}:</strong> Clasificación incorrecta. Valor real: <strong>${data.valor_real}</strong>, predicho: <strong>${m.prediccion}</strong>.`;
+        }
+      }
+
+      keys.forEach(k => {
+        const mod = modelos[k];
+        container.appendChild(crearTarjetaModelo(mod, true));
+      });
     }
 
     document.getElementById("formIndice").addEventListener("submit", (e) => {
@@ -1257,20 +1585,48 @@
       cargarMuestraExplorer(data.indice);
     });
 
+    document.getElementById("btnSiguienteDiscrepancia").addEventListener("click", async () => {
+      const act = Number(inputIndice.value) || 0;
+      try {
+        const res = await fetch(`/api/siguiente-discrepancia?actual=${act}`);
+        const data = await res.json();
+        if (res.ok) {
+          cargarMuestraExplorer(data.indice);
+        } else {
+          explorerErrorMsg.textContent = data.error || "No se encontraron más discrepancias.";
+          explorerErrorMsg.style.display = "inline";
+        }
+      } catch (err) {
+        explorerErrorMsg.textContent = "Error consultando discrepancia.";
+        explorerErrorMsg.style.display = "inline";
+      }
+    });
+
     document.getElementById("btnSiguienteError").addEventListener("click", async () => {
       const act = Number(inputIndice.value) || 0;
-      const res = await fetch(`/api/siguiente-error?actual=${act}`);
-      const data = await res.json();
-      cargarMuestraExplorer(data.indice);
+      const modeloTarget = modeloActivo === "ambos" ? "svm" : modeloActivo;
+      try {
+        const res = await fetch(`/api/siguiente-error?modelo=${modeloTarget}&actual=${act}`);
+        const data = await res.json();
+        if (res.ok) {
+          cargarMuestraExplorer(data.indice);
+        } else {
+          explorerErrorMsg.textContent = data.error || "No hay más errores.";
+          explorerErrorMsg.style.display = "inline";
+        }
+      } catch (err) {
+        explorerErrorMsg.textContent = "Error consultando siguiente error.";
+        explorerErrorMsg.style.display = "inline";
+      }
     });
 
     chkCuadricula.addEventListener("change", () => renderizarMuestraExplorer(ultimosPixelesExplorer));
 
-    // Inicializar tema guardado y vistas
+    // Inicializar tema y vista inicial
     const temaGuardado = localStorage.getItem("detectia-theme") === "dark";
     aplicarTema(temaGuardado);
     limpiarLienzo();
-    cargarMuestraExplorer(1100);
+    cargarMuestraExplorer(20);
   </script>
 </body>
 </html>
