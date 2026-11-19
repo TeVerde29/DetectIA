@@ -31,7 +31,7 @@ El reconocimiento de dígitos manuscritos dibujados libremente sobre pantallas t
 
 El proyecto está pensado para demostraciones académicas y experimentación práctica, y cuenta actualmente con dos entornos funcionales impulsados por un modelo **SVM Lineal (`SVC(kernel='linear')`)**:
 
-1. **Laboratorio web interactivo ([`web/app.py`](web/app.py))**: Servidor Flask con interfaz inspirada en Material 3 / Google Translate para dibujar dígitos, subir imágenes, inspeccionar la matriz `28x28` procesada y explorar las `10.500` muestras del conjunto de prueba.
+1. **Laboratorio web interactivo ([`web/app.py`](web/app.py))**: Servidor Flask con interfaz inspirada en Material 3 / Google Translate para dibujar dígitos, subir imágenes, inspeccionar la matriz `28x28` procesada y explorar las `8.400` muestras del conjunto de prueba.
 2. **Aplicación nativa Android ([`Proyecto Feria/DetectIA`](Proyecto%20Feria/DetectIA/))**: Cliente desarrollado en Kotlin que ejecuta inferencia matemática **100% offline** evaluando los 45 hiperplanos *One-vs-One* exportados a JSON, sin requerir conexión a internet ni runtimes externos como TensorFlow Lite u ONNX.
 
 ---
@@ -57,7 +57,7 @@ El proyecto está pensado para demostraciones académicas y experimentación pr�
 ### Plataforma web (`web/app.py` + `web/templates/index.html`)
 * **Dibujo libre y carga de imágenes**: Lienzo HTML5 interactivo para trazar dígitos con ratón o pantalla táctil, y carga de imágenes externas (`PNG`, `JPG`, `WEBP`).
 * **Visualización de entrada `28x28`**: Muestra exactamente la matriz normalizada que recibe el modelo tras el preprocesamiento.
-* **Explorador del conjunto de prueba**: Permite consultar por índice (`0` a `10.499`), cargar muestras aleatorias y navegar secuencialmente por los errores del modelo (`/api/siguiente-error`).
+* **Explorador del conjunto de prueba**: Permite consultar por índice (`0` a `8.399`), cargar muestras aleatorias y navegar secuencialmente por los errores del modelo (`/api/siguiente-error`).
 * **Carga modular de modelos**: Descubre automáticamente subcarpetas en `modelos/` que contengan `info.json` y un binario `.joblib`. Actualmente opera con el modelo `svm` (`SVC(kernel='linear')`).
 
 ### Aplicación móvil Android (`Proyecto Feria/DetectIA/`)
@@ -122,7 +122,7 @@ DetectIA/
 │   └── diseno.md                          # Documento histórico de diseño inicial (Fase 1)
 ├── img/                                   # Capturas de la web, app móvil y gráficos de evaluación
 ├── modelos/
-│   ├── datos_test.npz                     # 10.500 muestras de prueba (ignorado en Git)
+│   ├── datos_test.npz                     # 8.400 muestras de prueba (ignorado en Git)
 │   ├── svm/                               # Modelo SVM Lineal: scripts + artefactos entrenados
 │   │   ├── DetectIA_Fase1_Colab_Rapido.ipynb
 │   │   ├── digitos.py
@@ -177,7 +177,7 @@ pip install -r requirements.txt
 ```
 
 > [!NOTE]
-> La carpeta `modelos/` está excluida en `.gitignore`. Antes de iniciar `app.py` en una copia recién clonada, asegúrate de generar los artefactos en `modelos/svm/` (`info.json`, `modelo_svm.joblib`, `metricas_svm.json`) y `modelos/datos_test.npz` (por ejemplo, ejecutando `artefactos_detectia_Rapido/DetectIA_Fase1_Colab_Rapido.ipynb` o `digitos.py`).
+> Los binarios pesados (`*.joblib`, `*.npz`) están excluidos en `.gitignore`. Antes de iniciar `web/app.py` en una copia recién clonada, asegúrate de generar los artefactos en `modelos/svm/` (`info.json`, `modelo_svm.joblib`, `metricas_svm.json`) y `modelos/datos_test.npz` (por ejemplo, ejecutando `modelos/svm/DetectIA_Fase1_Colab_Rapido.ipynb` o `modelos/svm/digitos.py`).
 
 Inicia el servidor Flask:
 
@@ -211,14 +211,14 @@ El APK de depuración se genera en `Proyecto Feria/DetectIA/app/build/outputs/ap
 
 ## Especificación de la API REST
 
-Rutas expuestas por [`app.py`](app.py):
+Rutas expuestas por [`web/app.py`](web/app.py):
 
 | Método | Ruta | Descripción |
 | :--- | :--- | :--- |
-| `GET` | `/` | Renderiza la interfaz web (`templates/index.html`). |
+| `GET` | `/` | Renderiza la interfaz web (`web/templates/index.html`). |
 | `GET` | `/api/modelos` | Devuelve la lista de modelos cargados desde `modelos/*/info.json`. |
 | `POST` | `/api/predecir-dibujo` | Recibe `imagen_base64` o un vector `pixeles` (784 valores) y `modelo_id`, ejecuta el preprocesamiento y devuelve la predicción y puntajes Softmax. |
-| `GET` | `/api/muestra/<int:idx>` | Evalúa y devuelve una muestra del conjunto de prueba (`0` a `10.499`). |
+| `GET` | `/api/muestra/<int:idx>` | Evalúa y devuelve una muestra del conjunto de prueba (`0` a `8.399`). |
 | `GET` | `/api/aleatorio` | Selecciona y evalúa una muestra aleatoria del conjunto de prueba. |
 | `GET` | `/api/siguiente-error` | Devuelve la siguiente muestra fallada por el modelo indicado (`?modelo=svm&actual=-1`). |
 | `GET` | `/api/siguiente-discrepancia` | Busca la siguiente muestra donde difieren dos modelos (requiere al menos 2 modelos cargados en `modelos/`). |
@@ -259,7 +259,7 @@ Rutas expuestas por [`app.py`](app.py):
 
 ## Preprocesamiento matemático MNIST
 
-Tanto [`preprocesar_imagen_mnist`](app.py#L30-L73) en Python como [`MnistPreprocessor.process`](Proyecto%20Feria/DetectIA/app/src/main/java/unu/edu/detectia/MnistPreprocessor.kt#L35-L145) en Kotlin aplican la misma secuencia base:
+Tanto [`preprocesar_imagen_mnist`](web/app.py#L36-L79) en Python como [`MnistPreprocessor.process`](Proyecto%20Feria/DetectIA/app/src/main/java/unu/edu/detectia/MnistPreprocessor.kt#L35-L145) en Kotlin aplican la misma secuencia base:
 
 1. **Aislamiento de la región activa (*Bounding Box*)**: Se localizan los límites `[x_min, y_min, x_max, y_max]` de los píxeles del trazo.
 2. **Escalado proporcional a `20x20`**: El lado mayor se ajusta a 20 píxeles conservando la relación de aspecto (filtro Lanczos en Python; escalado filtrado en Android).
@@ -276,30 +276,31 @@ Tanto [`preprocesar_imagen_mnist`](app.py#L30-L73) en Python como [`MnistPreproc
 $$d_k = \mathbf{w}_k \cdot \mathbf{x} + b_k = \sum_{f=0}^{783} w_{k, f} \cdot x_f + b_k$$
 
 * Si $d_k > 0$, suma un voto a la clase $i$; en caso contrario, suma un voto a la clase $j$, acumulando además las distancias firmadas para el desempate continuo y su conversión a porcentajes mediante Softmax.
-* [`exportar_modelo_android.py`](Proyecto%20Feria/exportar_modelo_android.py) verifica que la implementación manual coincida con `modelo.predict()` antes de copiar el JSON a `app/src/main/assets/`.
+* [`exportar_modelo_android.py`](modelos/svm/exportar_modelo_android.py) verifica que la implementación manual coincida con `modelo.predict()` antes de copiar el JSON a `app/src/main/assets/`.
 
 ---
 
 ## Métricas del modelo actual
 
-Resultados registrados en [`modelos/svm/metricas_svm.json`](modelos/svm/metricas_svm.json) sobre el conjunto de prueba de `10.500` muestras (`random_state=42`, normalizado):
+Resultados registrados en [`modelos/svm/metricas_svm.json`](modelos/svm/metricas_svm.json) sobre la partición `80/20` estratificada (`random_state=42`, `C=0.05`, normalizado):
 
-| Parámetro / Métrica | Valor registrado (`SVC(kernel='linear')`) |
+| Parámetro / Métrica | Valor registrado (`SVC(kernel='linear', C=0.05)`) |
 | :--- | :--- |
-| Muestras totales (`digitos.csv`) | 42.000 (31.500 entrenamiento / 10.500 prueba) |
-| Exactitud en prueba (*Accuracy*) | **93.11%** (`0.9311428571428572`) |
-| Aciertos en prueba | 9.777 de 10.500 |
-| Errores en prueba | 723 de 10.500 |
-| Tiempo de entrenamiento | 76.47 s |
-| Tiempo de predicción (batch 10.500 muestras) | 28.23 s |
+| Muestras totales (`digitos.csv`) | 42.000 (33.600 entrenamiento / 8.400 prueba) |
+| Exactitud en entrenamiento (*Train Accuracy*) | **95.84%** (`0.9583630952380953`) |
+| Exactitud en prueba (*Test Accuracy*) | **93.81%** (`0.9380952380952381`) |
+| Aciertos en prueba | 7.880 de 8.400 |
+| Errores en prueba | 520 de 8.400 |
+| Tiempo de entrenamiento | 95.96 s |
+| Tiempo de predicción (batch 8.400 muestras) | 37.29 s |
 
 ---
 
 ## Limitaciones y estado del proyecto
 
-* **Modelo único activo**: Actualmente solo está entrenado y conectado el modelo **SVM Lineal (`SVC(kernel='linear')`)**. La arquitectura de `app.py` ya soporta múltiples modelos en `modelos/`, pero el entrenamiento e integración de una **Red Neuronal Convolucional (CNN)** queda pendiente para una etapa posterior (documentada como idea y roadmap en [`contexto.md`](contexto.md)).
-* **Artefactos fuera de Git**: La carpeta `modelos/` y los `.apk` compilados están ignorados en Git, por lo que requieren generación local tras clonar el repositorio.
-* **Diferencias menores en preprocesamiento**: `app.py` aplica estiramiento de contraste al máximo y desplazamiento subpíxel (`scipy.ndimage.shift`), mientras que `MnistPreprocessor.kt` usa redondeo entero de desplazamiento sobre Android `Bitmap`.
+* **Modelo único activo**: Actualmente solo está entrenado y conectado el modelo **SVM Lineal (`SVC(kernel='linear')`)**. La arquitectura de `web/app.py` ya soporta múltiples modelos en `modelos/`, pero el entrenamiento e integración de una **Red Neuronal Convolucional (CNN)** queda pendiente para una etapa posterior (documentada como idea y roadmap en [`contexto.md`](contexto.md)).
+* **Artefactos fuera de Git**: Los binarios pesados (`*.joblib`, `*.npz`) y los `.apk` compilados están ignorados en Git, por lo que requieren generación local tras clonar el repositorio.
+* **Diferencias menores en preprocesamiento**: `web/app.py` aplica estiramiento de contraste al máximo y desplazamiento subpíxel (`scipy.ndimage.shift`), mientras que `MnistPreprocessor.kt` usa redondeo entero de desplazamiento sobre Android `Bitmap`.
 * **Documentación histórica de Fase 1**: Los archivos [`desarrollo/analisis.md`](desarrollo/analisis.md) y [`desarrollo/diseno.md`](desarrollo/diseno.md) corresponden al planteamiento inicial (PWA) antes de migrar a Flask + Android nativo.
 
 ---

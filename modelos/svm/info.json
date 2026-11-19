@@ -2,7 +2,7 @@
   "id": "svm",
   "nombre": "SVM Lineal",
   "familia": "Máquina de Soporte Vectorial (SVC)",
-  "accuracy_pct": 93.11,
+  "accuracy_pct": 93.81,
   "archivo_modelo": "modelo_svm.joblib",
   "archivo_metricas": "metricas_svm.json",
   "normalizado": true
