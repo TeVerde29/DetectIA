@@ -4,11 +4,14 @@ import shutil
 import joblib
 import numpy as np
 
-RUTA_MODELO = os.path.join("modeloslinear", "modelo_svm.joblib")
-RUTA_DATOS_TEST = os.path.join("modeloslinear", "datos_test.npz")
-RUTA_JSON_SALIDA = "modelo_linear_android.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+
+RUTA_MODELO = os.path.join(BASE_DIR, "modelo_svm.joblib")
+RUTA_DATOS_TEST = os.path.join(os.path.dirname(BASE_DIR), "datos_test.npz")
+RUTA_JSON_SALIDA = os.path.join(BASE_DIR, "modelo_linear_android.json")
 RUTA_ASSETS_ANDROID = os.path.join(
-    "DetectIA", "app", "src", "main", "assets", "modelo_linear_android.json"
+    ROOT_DIR, "Proyecto Feria", "DetectIA", "app", "src", "main", "assets", "modelo_linear_android.json"
 )
 
 

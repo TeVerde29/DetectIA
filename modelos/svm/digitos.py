@@ -37,6 +37,8 @@ def localizar_dataset():
         "digitos.csv",
         os.path.join("datos", "digitos.csv"),
         os.path.join("DATOS", "digitos.csv"),
+        os.path.join("..", "..", "datos", "digitos.csv"),
+        os.path.join("..", "..", "DATOS", "digitos.csv"),
     ]
     for ruta in rutas_posibles:
         if os.path.exists(ruta):

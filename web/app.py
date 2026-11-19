@@ -16,9 +16,16 @@ from PIL import Image
 from flask import Flask, jsonify, render_template, request
 from scipy.ndimage import center_of_mass, shift
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
 
-CARPETA_MODELOS = "modelos"
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+)
+
+CARPETA_MODELOS = os.path.join(ROOT_DIR, "modelos")
 RUTA_TEST = os.path.join(CARPETA_MODELOS, "datos_test.npz")
 
 modelos_registrados = {}

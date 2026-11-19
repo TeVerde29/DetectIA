@@ -31,7 +31,7 @@ El reconocimiento de dígitos manuscritos dibujados libremente sobre pantallas t
 
 El proyecto está pensado para demostraciones académicas y experimentación práctica, y cuenta actualmente con dos entornos funcionales impulsados por un modelo **SVM Lineal (`SVC(kernel='linear')`)**:
 
-1. **Laboratorio web interactivo ([`app.py`](app.py))**: Servidor Flask con interfaz inspirada en Material 3 / Google Translate para dibujar dígitos, subir imágenes, inspeccionar la matriz `28x28` procesada y explorar las `10.500` muestras del conjunto de prueba.
+1. **Laboratorio web interactivo ([`web/app.py`](web/app.py))**: Servidor Flask con interfaz inspirada en Material 3 / Google Translate para dibujar dígitos, subir imágenes, inspeccionar la matriz `28x28` procesada y explorar las `10.500` muestras del conjunto de prueba.
 2. **Aplicación nativa Android ([`Proyecto Feria/DetectIA`](Proyecto%20Feria/DetectIA/))**: Cliente desarrollado en Kotlin que ejecuta inferencia matemática **100% offline** evaluando los 45 hiperplanos *One-vs-One* exportados a JSON, sin requerir conexión a internet ni runtimes externos como TensorFlow Lite u ONNX.
 
 ---
@@ -54,7 +54,7 @@ El proyecto está pensado para demostraciones académicas y experimentación pr�
 
 ## Funcionalidades implementadas
 
-### Plataforma web (`app.py` + `templates/index.html`)
+### Plataforma web (`web/app.py` + `web/templates/index.html`)
 * **Dibujo libre y carga de imágenes**: Lienzo HTML5 interactivo para trazar dígitos con ratón o pantalla táctil, y carga de imágenes externas (`PNG`, `JPG`, `WEBP`).
 * **Visualización de entrada `28x28`**: Muestra exactamente la matriz normalizada que recibe el modelo tras el preprocesamiento.
 * **Explorador del conjunto de prueba**: Permite consultar por índice (`0` a `10.499`), cargar muestras aleatorias y navegar secuencialmente por los errores del modelo (`/api/siguiente-error`).
@@ -76,12 +76,12 @@ flowchart TD
     subgraph Entrenamiento ["Entrenamiento y Exportación (Python)"]
         CSV["datos/digitos.csv (42.000 muestras)"] --> Train["DetectIA_Fase1_Colab_Rapido.ipynb / scripts Python"]
         Train --> Joblib["modelos/svm/modelo_svm.joblib + datos_test.npz"]
-        Train --> Export["Proyecto Feria/exportar_modelo_android.py"]
+        Train --> Export["modelos/svm/exportar_modelo_android.py"]
         Export --> JsonWeights["modelo_linear_android.json"]
     end
 
     subgraph Web ["Laboratorio Web (Flask)"]
-        CanvasWeb["HTML5 Canvas / Imagen"] --> PrePy["preprocesar_imagen_mnist (app.py)"]
+        CanvasWeb["HTML5 Canvas / Imagen"] --> PrePy["preprocesar_imagen_mnist (web/app.py)"]
         PrePy --> SvmPy["SVC(kernel='linear') (Joblib)"]
         SvmPy --> UiWeb["Predicción + Afinidades Softmax + Vista 28x28"]
     end
@@ -115,33 +115,39 @@ flowchart TD
 
 ```text
 DetectIA/
-├── artefactos_detectia_Rapido/
-│   ├── DetectIA_Fase1_Colab_Rapido.ipynb  # Notebook de entrenamiento rápido en Colab (SVC lineal)
-│   └── img/                               # Gráficos generados en el notebook
 ├── datos/
 │   └── digitos.csv                        # Dataset MNIST tabular (42.000 filas x 785 columnas)
 ├── desarrollo/
 │   ├── analisis.md                        # Documento histórico de análisis inicial (Fase 1)
 │   └── diseno.md                          # Documento histórico de diseño inicial (Fase 1)
 ├── img/                                   # Capturas de la web, app móvil y gráficos de evaluación
-├── modelos/                               # Artefactos locales (ignorado en Git; ver .gitignore)
-│   ├── datos_test.npz                     # 10.500 muestras de prueba
-│   └── svm/                               # info.json, metricas_svm.json y modelo_svm.joblib
+├── modelos/
+│   ├── datos_test.npz                     # 10.500 muestras de prueba (ignorado en Git)
+│   ├── svm/                               # Modelo SVM Lineal: scripts + artefactos entrenados
+│   │   ├── DetectIA_Fase1_Colab_Rapido.ipynb
+│   │   ├── digitos.py
+│   │   ├── modeloDigitosLinear.py
+│   │   ├── modeloDigitosRbf.py
+│   │   ├── exportar_modelo_android.py
+│   │   ├── info.json
+│   │   ├── metricas_svm.json
+│   │   └── modelo_svm.joblib              # Binario entrenado (ignorado en Git)
+│   └── cnn/                               # Carpeta reservada para el futuro modelo CNN
+├── web/                                   # Plataforma web desacoplada (HTML, CSS, JS, Flask)
+│   ├── static/
+│   │   ├── css/style.css
+│   │   ├── js/app.js
+│   │   └── img/
+│   ├── templates/index.html
+│   └── app.py                             # Servidor Flask y API REST
 ├── Proyecto Feria/
-│   ├── DetectIA/                          # Proyecto Android Studio (Kotlin nativo)
-│   │   ├── app/src/main/assets/modelo_linear_android.json
-│   │   └── app/src/main/java/unu/edu/detectia/
-│   │       ├── DrawingView.kt
-│   │       ├── MainActivity.kt
-│   │       ├── MnistPreprocessor.kt
-│   │       └── SvmLinearClassifier.kt
-│   ├── exportar_modelo_android.py         # Exporta pesos OvO de SVC lineal a JSON y los verifica
-│   ├── modeloDigitosLinear.py             # Entrenamiento local de SVC(kernel='linear')
-│   └── modeloDigitosRbf.py                # Experimento local con SVC(kernel='rbf', C=5)
-├── static/img/                            # Logos y recursos estáticos de la web
-├── templates/index.html                   # Interfaz gráfica del laboratorio web
-├── app.py                                 # Servidor Flask y API REST
-├── digitos.py                             # Script clásico de entrenamiento, métricas y gráficos
+│   └── DetectIA/                          # Proyecto Android Studio (Kotlin nativo)
+│       ├── app/src/main/assets/modelo_linear_android.json
+│       └── app/src/main/java/unu/edu/detectia/
+│           ├── DrawingView.kt
+│           ├── MainActivity.kt
+│           ├── MnistPreprocessor.kt
+│           └── SvmLinearClassifier.kt
 ├── contexto.md                            # Bitácora técnica e ideas futuras del proyecto
 └── requirements.txt                       # Dependencias de Python
 ```
@@ -176,7 +182,7 @@ pip install -r requirements.txt
 Inicia el servidor Flask:
 
 ```bash
-python app.py
+python web/app.py
 ```
 
 El servidor escucha en `http://127.0.0.1:5000`.

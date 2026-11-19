@@ -9,7 +9,6 @@ __pycache__/
 *$py.class
 
 # Modelos entrenados y artefactos pesados generados localmente
-modelos/
 *.joblib
 *.npz
 *.pkl

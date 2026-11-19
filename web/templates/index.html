@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DetectIA — Laboratorio Multi-Modelo de Dígitos Manuscritos</title>
+  <link rel="icon" type="image/png" href="/static/img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <!-- BANDA HERO SUPERIOR -->
+  <div class="hero-band">
+    <div class="container">
+      <header>
+        <div class="brand-group">
+          <img src="/static/img/logo.png" alt="DetectIA Logo" class="brand-logo" />
+          <div class="title-group">
+            <h1>DetectIA — Laboratorio Multi-Modelo</h1>
+            <p>Plataforma comparativa de IA: SVM Lineal vs Red Neuronal en MNIST (28 × 28)</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="stat-pill">Modelos: <strong>{{ resumen.total_modelos }} activos</strong></div>
+          <div class="stat-pill">Test set: <strong>{{ resumen.total_prueba }} muestras</strong></div>
+          <div class="stat-pill">Discrepancias: <strong>{{ resumen.discrepancias }}</strong></div>
+          <button type="button" class="theme-toggle" id="btnTheme" title="Alternar tema claro/oscuro">
+            Tema oscuro
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>
+
+  <div class="container main-wrap">
+
+    <!-- PESTAÑAS PRINCIPALES TIPO PÍLDORA GOOGLE TRANSLATE -->
+    <nav class="nav-tabs">
+      <button type="button" class="tab-btn active" id="tabBtnDraw" onclick="cambiarPestana('draw')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        <span>Dibujar en vivo</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabBtnExplorer" onclick="cambiarPestana('explorer')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span>Explorador de dataset ({{ resumen.total_prueba }})</span>
+      </button>
+    </nav>
+
+    <!-- SELECTOR DE MODELO / SUBHEADER ESTILO TRANSLATE CON INDICADOR SUBRAYADO -->
+    <div class="model-selector-bar">
+      <div class="model-selector-label">
+        <span>Inferencia:</span>
+      </div>
+      <div class="model-chips-group" id="modelChipsContainer">
+        <button type="button" class="model-chip-btn active" data-model="ambos" onclick="seleccionarModoModelo('ambos')">
+          <span>Modo Dúo (Comparar Ambos)</span>
+        </button>
+        {% for m in modelos %}
+        <button type="button" class="model-chip-btn" data-model="{{ m.id }}" onclick="seleccionarModoModelo('{{ m.id }}')">
+          <span>{{ m.nombre }} ({{ m.accuracy_pct }}%)</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PESTAÑA 1: DIBUJAR EN VIVO                                            -->
+    <!-- ===================================================================== -->
+    <main class="tab-content active" id="viewDraw">
+      <div class="grid-draw">
+        <!-- PANEL IZQUIERDO: LIENZO (BLANCO PURO) -->
+        <section class="card card-input">
+          <div class="card-header">
+            <h2 class="card-title">Lienzo de entrada</h2>
+            <span class="chip">Táctil / Mouse</span>
+          </div>
+
+          <div class="canvas-area">
+            <div class="mode-switch">
+              <button type="button" class="mode-opt active" id="modeLibre" onclick="setModoDibujo('libre')">Trazo libre HD</button>
+              <button type="button" class="mode-opt" id="modeGrid" onclick="setModoDibujo('grid')">Malla 28×28</button>
+            </div>
+
+            <canvas id="drawCanvas" width="280" height="280"></canvas>
+
+            <div class="stroke-bar" id="strokeBar">
+              <span>Grosor:</span>
+              <button type="button" class="stroke-btn" onclick="setGrosor(16, this)">Fino</button>
+              <button type="button" class="stroke-btn active" onclick="setGrosor(22, this)">Medio</button>
+              <button type="button" class="stroke-btn" onclick="setGrosor(28, this)">Grueso</button>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn btn-outline-danger" id="btnClearDraw">Limpiar</button>
+              <button type="button" class="btn btn-primary" id="btnPredictDraw">Reconocer</button>
+            </div>
+
+            <label class="check-label">
+              <input type="checkbox" id="chkAutoPredict" checked />
+              Inferencia automática al soltar trazo
+            </label>
+            <div class="error-toast" id="drawErrorMsg"></div>
+          </div>
+        </section>
+
+        <!-- PANEL DERECHO: RESULTADOS (CONTENEDOR #f0f4f9 GOOGLE TRANSLATE) -->
+        <section class="card card-output">
+          <div class="card-header">
+            <h2 class="card-title" id="drawSectionTitle">Evaluación Comparativa en Vivo</h2>
+            <span class="chip" id="drawOverallLatency">Listo</span>
+          </div>
+
+          <!-- VEREDICTO GENERAL / COMPARATIVO -->
+          <div class="verdict-banner idle" id="drawVerdictBanner">
+            <span id="drawVerdictText">Dibuja un dígito en el lienzo para iniciar la clasificación simultánea.</span>
+          </div>
+
+          <!-- INSPECCIÓN MATRIZ 28x28 PREPROCESADA -->
+          <div class="preview-inspection-row">
+            <div class="preview-info">
+              <span class="title">Entrada normalizada (28 × 28 px)</span>
+              <span class="desc">Alineación por centro de masa MNIST + interpolación Lanczos</span>
+            </div>
+            <canvas id="gridCanvas" width="280" height="280"></canvas>
+          </div>
+
+          <!-- CONTENEDOR DE TARJETAS DE MODELOS (DÚO O INDIVIDUAL) -->
+          <div class="duo-cards-grid" id="drawModelsContainer">
+            <!-- Rellenado dinámicamente por JavaScript -->
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- PESTAÑA 2: EXPLORADOR DEL DATASET TEST                                -->
+    <!-- ===================================================================== -->
+    <main class="tab-content" id="viewExplorer">
+      <!-- BARRA DE HERRAMIENTAS DEL EXPLORADOR -->
+      <section class="explorer-toolbar">
+        <form class="index-form" id="formIndice">
+          <label for="inputIndice" style="font-size: 0.86rem; color: var(--text-2); font-weight: 500;">
+            Índice (0 – {{ resumen.total_prueba - 1 }}):
+          </label>
+          <button type="button" class="btn btn-secondary" style="flex: 0; padding: 8px 12px;" id="btnPrev">◀</button>
+          <input type="number" id="inputIndice" min="0" max="{{ resumen.total_prueba - 1 }}" value="20" required />
+          <button type="button" class="btn btn-secondary" style="flex: 0; padding: 8px 12px;" id="btnNext">▶</button>
+          <button type="submit" class="btn btn-primary" style="flex: 0; padding: 8px 14px;">Consultar</button>
+          <span class="error-toast" id="explorerErrorMsg"></span>
+        </form>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <button type="button" class="btn btn-secondary" style="flex: 0;" id="btnAleatorio">
+            <span>Aleatorio</span>
+          </button>
+          <button type="button" class="btn btn-secondary" style="flex: 0; color: var(--warning); border-color: rgba(151,103,25,0.4) !important;" id="btnSiguienteDiscrepancia" title="Muestra donde SVM y Red Neuronal predicen diferente">
+            <span>Siguiente Discrepancia ({{ resumen.discrepancias }})</span>
+          </button>
+          <button type="button" class="btn btn-secondary" style="flex: 0; color: var(--error); border-color: rgba(180,71,67,0.4) !important;" id="btnSiguienteError">
+            <span>Siguiente Error</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="grid-draw">
+        <!-- COLUMNA IZQUIERDA: MATRIZ DE LA MUESTRA (BLANCO PURO) -->
+        <section class="card card-input">
+          <div class="card-header">
+            <h2 class="card-title">Muestra #<span id="lblIndiceActual">20</span></h2>
+            <span class="chip">Conjunto Test</span>
+          </div>
+
+          <div class="canvas-area">
+            <canvas id="datasetCanvas" width="280" height="280"></canvas>
+            <div style="display: flex; gap: 16px;">
+              <label class="check-label">
+                <input type="checkbox" id="chkCuadricula" checked />
+                Ver cuadrícula 28×28
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- COLUMNA DERECHA: EVALUACIÓN FRENTE AL VALOR REAL (#f0f4f9 CONTENEDOR) -->
+        <section class="card card-output">
+          <div class="card-header">
+            <h2 class="card-title">Veredicto y Comparativa de Inferencia</h2>
+            <span class="chip" id="explorerLatency">Listo</span>
+          </div>
+
+          <!-- TARJETA DEL VALOR REAL -->
+          <div class="explorer-ground-truth-card">
+            <div>
+              <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); font-weight: 600;">
+                Etiqueta Real (Ground Truth)
+              </span>
+              <div style="font-size: 0.85rem; color: var(--text-2); margin-top: 2px;">
+                Dígito manuscrito original verificado
+              </div>
+            </div>
+            <div class="ground-truth-val" id="explorerRealVal">—</div>
+          </div>
+
+          <!-- BANNER COMPARATIVO -->
+          <div class="verdict-banner idle" id="explorerVerdictBanner">
+            <span id="explorerVerdictText">Cargando evaluación...</span>
+          </div>
+
+          <!-- TARJETAS DE EVALUACIÓN MULTI-MODELO -->
+          <div class="duo-cards-grid" id="explorerModelsContainer">
+            <!-- Rellenado dinámicamente por JavaScript -->
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    window.DETECTIA_CONFIG = {
+      totalMuestras: {{ resumen.total_prueba }},
+      modelosInfo: {{ modelos | tojson }}
+    };
+  </script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
