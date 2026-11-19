@@ -1,142 +1,154 @@
-# DetectIA — Laboratorio Multi-Modelo y Plataforma Móvil de Reconocimiento de Dígitos
+# DetectIA — Reconocimiento de Dígitos Manuscritos (Web + Android Offline)
 
-> Sistema integral de aprendizaje automático para la clasificación, comparación y análisis de dígitos manuscritos (MNIST) mediante interfaz web estilo Google Translate y aplicación nativa Android 100% offline.
+> Sistema de aprendizaje automático para la clasificación y análisis de dígitos manuscritos del `0` al `9` (MNIST) mediante un laboratorio web en Flask y una aplicación nativa Android 100% offline basada en `SVC(kernel='linear')`.
 
-![Estado](https://img.shields.io/badge/Estado-Activo-success)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)
-![scikit--learn](https://img.shields.io/badge/scikit--learn-1.5-F7931E?logo=scikitlearn&logoColor=white)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.9-7F52FF?logo=kotlin&logoColor=white)
-![Android](https://img.shields.io/badge/Android-SDK%2035-3DDC84?logo=android&logoColor=white)
-
-## Capturas
-
-| Laboratorio web interactivo (diseño Google Translate) | Matriz de confusión multiclase SVM |
-| :---: | :---: |
-| ![Laboratorio web](img/web_laboratorio.png) | ![Matriz de confusión](img/matriz_confusion.png) |
-
-| App Android nativa offline (Modo Claro) | App Android nativa offline (Modo Oscuro) |
-| :---: | :---: |
-| ![App Android Modo Claro](img/app_modo_claro.png) | ![App Android Modo Oscuro](img/app_modo_oscuro.png) |
-
-Los investigadores y estudiantes exploran el laboratorio web para contrastar la exactitud y los vectores de probabilidad entre Máquinas de Soporte Vectorial (SVM) y Redes Neuronales Artificiales (MLP) sobre casos límite de MNIST, mientras que los usuarios móviles dibujan trazos sobre la pantalla táctil de su dispositivo Android para obtener inferencias instantáneas en 0.23 ms sin conexión a internet ni servidores externos.
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-%3E%3D3.0-000000?logo=flask&logoColor=white)
+![scikit--learn](https://img.shields.io/badge/scikit--learn-%3E%3D1.5-F7931E?logo=scikitlearn&logoColor=white)
+![Android](https://img.shields.io/badge/Android-minSdk%2024%20%7C%20targetSdk%2037-3DDC84?logo=android&logoColor=white)
 
 ## Tabla de contenidos
 
-1. [Descripción](#descripción)
-2. [Demo / Producción / Descarga](#demo--producción--descarga)
-3. [Características principales](#características-principales)
-4. [Stack tecnológico](#stack-tecnológico)
-5. [Arquitectura](#arquitectura)
-6. [Instalación y uso](#instalación-y-uso)
-7. [Requisitos del sistema](#requisitos-del-sistema)
+1. [Resumen del proyecto](#resumen-del-proyecto)
+2. [Capturas](#capturas)
+3. [Funcionalidades implementadas](#funcionalidades-implementadas)
+4. [Arquitectura](#arquitectura)
+5. [Stack tecnológico](#stack-tecnológico)
+6. [Estructura del repositorio](#estructura-del-repositorio)
+7. [Instalación y ejecución](#instalación-y-ejecución)
 8. [Especificación de la API REST](#especificación-de-la-api-rest)
 9. [Preprocesamiento matemático MNIST](#preprocesamiento-matemático-mnist)
 10. [Motor de inferencia Android One-vs-One](#motor-de-inferencia-android-one-vs-one)
-11. [Comparativa de modelos](#comparativa-de-modelos)
-12. [Licencia](#licencia)
-13. [Autor](#autor)
+11. [Métricas del modelo actual](#métricas-del-modelo-actual)
+12. [Limitaciones y estado del proyecto](#limitaciones-y-estado-del-proyecto)
+13. [Licencia y autor](#licencia-y-autor)
 
 ---
 
-## Descripción
+## Resumen del proyecto
 
-El reconocimiento de dígitos manuscritos presenta problemas complejos debido a la heterogeneidad caligráfica: variaciones de escala, grosor de trazo, excentricidad y desalineación espacial respecto a la cuadrícula de captura. DetectIA aborda este desafío mediante una solución desacoplada que normaliza trazos libres hacia una cuadrícula estándar de $28 \times 28$ píxeles y ejecuta clasificación multiclase sobre 10 categorías numéricas (del 0 al 9).
+El reconocimiento de dígitos manuscritos dibujados libremente sobre pantallas táctiles o lienzos digitales suele fallar cuando los trazos no coinciden en escala, posición o grosor con los datos de entrenamiento. **DetectIA** resuelve este problema aplicando un pipeline de normalización geométrica estándar de MNIST (recorte de caja delimitadora, escalado proporcional a `20x20` y centrado por centro de masa en una matriz de `28x28`) antes de ejecutar la clasificación.
 
-El proyecto integra dos entornos operativos complementarios. Por un lado, una plataforma web construida en Flask con estética minimalista basada en Google Translate, que admite dibujo libre y carga de imágenes, facilitando la comparación lado a lado entre clasificadores de margen lineal (SVM) y arquitecturas densas no lineales (Redes Neuronales Perceptrón Multicapa). Por otro lado, una aplicación nativa Android desarrollada en Kotlin que traslada el modelo SVM a la arquitectura del cliente móvil, ejecutando inferencia 100% offline con tiempos de respuesta inferiores a un milisegundo.
+El proyecto está pensado para demostraciones académicas y experimentación práctica, y cuenta actualmente con dos entornos funcionales impulsados por un modelo **SVM Lineal (`SVC(kernel='linear')`)**:
 
-A nivel de diseño de ingeniería, el sistema descarta bases de datos persistentes: el conocimiento matemático del clasificador reside en los parámetros vectoriales y sesgos serializados. El pipeline de procesamiento asegura paridad estricta entre cliente y servidor mediante centrado por centro de masa subpíxel y redimensionamiento proporcional Lanczos, garantizando que los trazos dibujados a mano emulen con fidelidad la distribución del dataset MNIST.
+1. **Laboratorio web interactivo ([`app.py`](app.py))**: Servidor Flask con interfaz inspirada en Material 3 / Google Translate para dibujar dígitos, subir imágenes, inspeccionar la matriz `28x28` procesada y explorar las `10.500` muestras del conjunto de prueba.
+2. **Aplicación nativa Android ([`Proyecto Feria/DetectIA`](Proyecto%20Feria/DetectIA/))**: Cliente desarrollado en Kotlin que ejecuta inferencia matemática **100% offline** evaluando los 45 hiperplanos *One-vs-One* exportados a JSON, sin requerir conexión a internet ni runtimes externos como TensorFlow Lite u ONNX.
 
-## Demo / Producción / Descarga
+---
 
-| Capa / Recurso | Detalle | Enlace |
-| :--- | :--- | :--- |
-| Código fuente | Repositorio oficial en GitHub | [https://github.com/TeVerde29/DetectIA](https://github.com/TeVerde29/DetectIA) |
-| Aplicación móvil | APK instalable Android (Debug) | [`Proyecto Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/Proyecto%20Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk) |
-| Datos de entrenamiento | Dataset tabular MNIST (42.000 muestras) | [`DATOS/digitos.csv`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/DATOS/digitos.csv) |
-| Especificación formal | Requerimientos bajo ciclo cascada | [`desarrollo/analisis.md`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/desarrollo/analisis.md) |
-| Documento de diseño | Arquitectura técnica y diagramas | [`desarrollo/diseno.md`](file:///c:/Users/hikih/Documents/Repositorios/DetectIA/desarrollo/diseno.md) |
+## Capturas
 
-## Características principales
+### Laboratorio web interactivo y matriz de confusión
 
-- **Arquitectura multi-modelo desacoplada:** Estructura de directorios modular en `modelos/` que permite registrar modelos independientes (SVM Lineal y Red Neuronal MLP) con metadatos de configuración en `info.json`.
-- **Laboratorio web con estética Google Translate:** Panel interactivo en Flask con lienzo HTML5, barra de navegación superior, cambio de vistas (dibujo o archivo) y visualización simultánea de dos modelos.
-- **Preprocesamiento matemático estricto:** Aislamiento de la caja delimitadora (*bounding box*), escalado proporcional Lanczos a una malla de $20 \times 20$ y reubicación subpíxel por centro de masa a la coordenada $(13.5, 13.5)$.
-- **Inferencia Android nativa 100% offline:** Motor algebraico en Kotlin puro (`SvmLinearClassifier.kt`) que evalúa 45 hiperplanos One-vs-One sin requerir TensorFlow Lite ni dependencias externas pesadas.
-- **Rendimiento de ultra-baja latencia:** Tiempos de ejecución en dispositivo móvil de 0.20 ms a 0.35 ms por predicción sobre procesadores ARM comerciales.
-- **Soporte nativo de temas Claro y Oscuro:** Adaptabilidad visual completa en la aplicación móvil con conmutación dinámica de paletas cromáticas de alto contraste.
-- **Explorador de discrepancias empíricas:** Mecanismo en servidor para extraer de forma automática muestras del conjunto de prueba donde el clasificador lineal y la red neuronal emiten predicciones divergentes.
+![Laboratorio web de DetectIA](img/web_laboratorio.png)
 
-## Stack tecnológico
+![Matriz de confusión del modelo SVM Lineal](img/matriz_confusion.png)
 
-| Capa / Componente | Tecnología | Versión | Función en el sistema |
-| :--- | :--- | :--- | :--- |
-| Lenguaje servidor | Python | 3.11.0 | Entorno de backend, pipelines y cálculo científico |
-| Framework web | Flask | >= 3.0.0 | API REST y servidor de la interfaz web |
-| Aprendizaje automático | scikit-learn | >= 1.5.0 | Algoritmos `LinearSVC` y `MLPClassifier` |
-| Cálculo matricial | NumPy | >= 2.0.0 | Operaciones tensoriales y normalización vectorial |
-| Manipulación de datos | pandas | >= 2.0.0 | Carga y segmentación de datos tabulares MNIST |
-| Procesamiento de imagen | Pillow / SciPy | >= 10.0 / >= 1.12 | Interpolación Lanczos y cálculo de centro de masa |
-| Lenguaje móvil | Kotlin | 1.9.0 | Lógica nativa de la aplicación Android |
-| Plataforma móvil | Android SDK | SDK 35 (compile 37) | Sistema operativo de la aplicación de usuario final |
-| Interfaz móvil | Material Components | 1.10.0 | Componentes UI, tipografía Google Sans y estilos |
-| Serialización móvil | JSON | RFC 8259 | Almacenamiento empaquetado de pesos ($W, b$) en assets |
+### Aplicación nativa Android (Modo Claro y Modo Oscuro)
+
+![App Android en Modo Claro](img/app_modo_claro.png)
+
+![App Android en Modo Oscuro](img/app_modo_oscuro.png)
+
+---
+
+## Funcionalidades implementadas
+
+### Plataforma web (`app.py` + `templates/index.html`)
+* **Dibujo libre y carga de imágenes**: Lienzo HTML5 interactivo para trazar dígitos con ratón o pantalla táctil, y carga de imágenes externas (`PNG`, `JPG`, `WEBP`).
+* **Visualización de entrada `28x28`**: Muestra exactamente la matriz normalizada que recibe el modelo tras el preprocesamiento.
+* **Explorador del conjunto de prueba**: Permite consultar por índice (`0` a `10.499`), cargar muestras aleatorias y navegar secuencialmente por los errores del modelo (`/api/siguiente-error`).
+* **Carga modular de modelos**: Descubre automáticamente subcarpetas en `modelos/` que contengan `info.json` y un binario `.joblib`. Actualmente opera con el modelo `svm` (`SVC(kernel='linear')`).
+
+### Aplicación móvil Android (`Proyecto Feria/DetectIA/`)
+* **Lienzo táctil adaptable (`DrawingView.kt`)**: Captura trazos con suavizado cuadrático y soporte dinámico de **Modo Claro** (fondo blanco, trazo negro) y **Modo Oscuro** (fondo oscuro, trazo blanco).
+* **Preprocesamiento en dispositivo (`MnistPreprocessor.kt`)**: Detecta el *bounding box*, escala manteniendo proporción a `20x20`, centra por centro de masa en `28x28` y normaliza intensidades en `[0.0, 1.0]`.
+* **Inferencia algebraica offline (`SvmLinearClassifier.kt`)**: Carga `modelo_linear_android.json` desde `assets/`, evalúa los 45 clasificadores binarios *One-vs-One*, muestra la predicción, el tiempo de inferencia en milisegundos, la miniatura `28x28` y el ranking Top 3 con barras de probabilidad Softmax.
+
+---
 
 ## Arquitectura
 
-```text
-DetectIA/
-├── DATOS/
-│   └── digitos.csv                         # Dataset MNIST: 42.000 filas x 785 columnas
-├── desarrollo/
-│   ├── analisis.md                         # Requerimientos funcionales y reglas de negocio
-│   └── diseno.md                           # Diagramas de flujo y arquitectura técnica
-├── img/
-│   ├── app_modo_claro.png                  # Captura de pantalla Android en tema claro
-│   ├── app_modo_oscuro.png                 # Captura de pantalla Android en tema oscuro
-│   ├── web_laboratorio.png                 # Captura de la interfaz web multi-modelo
-│   ├── matriz_confusion.png                # Mapa de calor de evaluación multiclase
-│   ├── muestra_digitos.png                 # Muestra de caracteres del dataset
-│   └── histograma_distribucion.png         # Balance de frecuencias por clase numérica
-├── modelos/
-│   ├── cnn/
-│   │   ├── info.json                       # Configuración y metadatos de la Red Neuronal
-│   │   ├── metricas_cnn.json               # Métricas de prueba y exactitud (97.34%)
-│   │   └── modelo_cnn.joblib               # Binario entrenado de MLPClassifier
-│   ├── svm/
-│   │   ├── info.json                       # Configuración y metadatos del modelo SVM
-│   │   ├── metricas_svm.json               # Métricas de prueba y exactitud (93.11%)
-│   │   └── modelo_svm.joblib               # Binario entrenado de LinearSVC
-│   ├── datos_test.npz                      # 10.500 vectores de prueba desacoplados
-│   └── discrepancias.json                  # Índices de validación con divergencia de modelos
-├── Proyecto Feria/DetectIA/                # Proyecto Android Studio (Kotlin nativo)
-│   ├── app/
-│   │   ├── src/main/assets/
-│   │   │   └── modelo_linear_android.json  # Pesos (45x784) y sesgos embebidos (268 KB)
-│   │   ├── src/main/java/unu/edu/detectia/
-│   │   │   ├── DrawingView.kt              # Lienzo táctil con interpolación de trazo
-│   │   │   ├── MainActivity.kt             # Ciclo de vida UI y alternancia claro/oscuro
-│   │   │   ├── MnistPreprocessor.kt        # Bounding box, Lanczos y centrado por masa
-│   │   │   └── SvmLinearClassifier.kt      # Motor de inferencia One-vs-One y Softmax
-│   │   └── src/main/res/                   # Layouts, fuentes Google Sans y temas día/noche
-│   └── build.gradle.kts                    # Configuración de compilación Android
-├── static/
-│   └── img/                                # Recursos gráficos y logos de la web
-├── templates/
-│   └── index.html                          # Interfaz web responsiva con canvas interactivo
-├── app.py                                  # Servidor Flask y controlador de inferencia REST
-├── digitos.py                              # Pipeline clásico de validación y graficación
-└── requirements.txt                        # Especificación estricta de dependencias Python
+El sistema no utiliza bases de datos relacionales; los parámetros aprendidos se almacenan directamente en archivos serializados (`.joblib` para el servidor web y `.json` de pesos para Android).
+
+```mermaid
+flowchart TD
+    subgraph Entrenamiento ["Entrenamiento y Exportación (Python)"]
+        CSV["datos/digitos.csv (42.000 muestras)"] --> Train["DetectIA_Fase1_Colab_Rapido.ipynb / scripts Python"]
+        Train --> Joblib["modelos/svm/modelo_svm.joblib + datos_test.npz"]
+        Train --> Export["Proyecto Feria/exportar_modelo_android.py"]
+        Export --> JsonWeights["modelo_linear_android.json"]
+    end
+
+    subgraph Web ["Laboratorio Web (Flask)"]
+        CanvasWeb["HTML5 Canvas / Imagen"] --> PrePy["preprocesar_imagen_mnist (app.py)"]
+        PrePy --> SvmPy["SVC(kernel='linear') (Joblib)"]
+        SvmPy --> UiWeb["Predicción + Afinidades Softmax + Vista 28x28"]
+    end
+
+    subgraph Android ["App Nativa Android (Kotlin / Offline)"]
+        Touch["DrawingView.kt"] --> PreKt["MnistPreprocessor.kt"]
+        JsonWeights -.->|"Empaquetado en assets/"| SvmKt["SvmLinearClassifier.kt (45 hiperplanos OvO)"]
+        PreKt --> SvmKt
+        SvmKt --> UiKt["MainActivity.kt (Top 3 + Latencia)"]
+    end
 ```
 
-### Decisiones de arquitectura
+---
 
-- **Persistencia en coeficientes algebraicos:** No existen bases de datos relacionales ni motores SQL. El aprendizaje se traduce directamente a hiperplanos de corte definidos por matrices de pesos y vectores de sesgo.
-- **Preprocesamiento desacoplado pero idéntico:** Tanto `app.py` en Python como `MnistPreprocessor.kt` en Android replican las mismas fases matemáticas: extracción de caja delimitadora, escalado a $20 \times 20$, centrado por centro de masa sobre matriz de $28 \times 28$ y normalización de intensidad en rango $[0, 1]$.
-- **Inferencia perimetral (Edge Computing):** La aplicación móvil no realiza peticiones HTTP para predecir. El clasificador reside en el paquete APK en formato JSON optimizado, asegurando privacidad total y funcionamiento autónomo sin cobertura de red.
-- **Modularidad extensible:** El directorio `modelos/` permite incorporar nuevos modelos de clasificación sin modificar el código del servidor; basta con crear una subcarpeta con su `info.json` y archivo `.joblib`.
+## Stack tecnológico
 
-## Instalación y uso
+| Capa | Tecnología | Versión confirmada | Responsabilidad |
+| :--- | :--- | :--- | :--- |
+| Lenguaje servidor y ML | Python | 3.11+ | Entrenamiento, scripts y servidor web |
+| Servidor web | Flask | `>= 3.0.0` | API REST y renderizado de `templates/index.html` |
+| Machine Learning | scikit-learn | `>= 1.5.0` | Entrenamiento e inferencia con `SVC(kernel='linear')` |
+| Cálculo y datos | NumPy / pandas | `>= 2.0.0` / `>= 2.0.0` | Manejo del CSV MNIST y operaciones vectoriales |
+| Imagen y serialización | Pillow / SciPy / joblib | `>= 10.0.0` / `>= 1.12.0` / `>= 1.4.0` | Redimensionado Lanczos, centro de masa y carga `.joblib` |
+| Graficación | matplotlib | `>= 3.8.0` | Histogramas y matriz de confusión en entrenamiento |
+| Cliente móvil | Kotlin + Android Gradle Plugin | AGP `9.5.1`, `minSdk 24`, `targetSdk 37` | Aplicación nativa Android offline |
+| UI móvil | Material Components / AppCompat / ConstraintLayout | `1.10.0` / `1.6.1` / `2.1.4` | Interfaz Material, fuentes y temas claro/oscuro |
+
+---
+
+## Estructura del repositorio
+
+```text
+DetectIA/
+├── artefactos_detectia_Rapido/
+│   ├── DetectIA_Fase1_Colab_Rapido.ipynb  # Notebook de entrenamiento rápido en Colab (SVC lineal)
+│   └── img/                               # Gráficos generados en el notebook
+├── datos/
+│   └── digitos.csv                        # Dataset MNIST tabular (42.000 filas x 785 columnas)
+├── desarrollo/
+│   ├── analisis.md                        # Documento histórico de análisis inicial (Fase 1)
+│   └── diseno.md                          # Documento histórico de diseño inicial (Fase 1)
+├── img/                                   # Capturas de la web, app móvil y gráficos de evaluación
+├── modelos/                               # Artefactos locales (ignorado en Git; ver .gitignore)
+│   ├── datos_test.npz                     # 10.500 muestras de prueba
+│   └── svm/                               # info.json, metricas_svm.json y modelo_svm.joblib
+├── Proyecto Feria/
+│   ├── DetectIA/                          # Proyecto Android Studio (Kotlin nativo)
+│   │   ├── app/src/main/assets/modelo_linear_android.json
+│   │   └── app/src/main/java/unu/edu/detectia/
+│   │       ├── DrawingView.kt
+│   │       ├── MainActivity.kt
+│   │       ├── MnistPreprocessor.kt
+│   │       └── SvmLinearClassifier.kt
+│   ├── exportar_modelo_android.py         # Exporta pesos OvO de SVC lineal a JSON y los verifica
+│   ├── modeloDigitosLinear.py             # Entrenamiento local de SVC(kernel='linear')
+│   └── modeloDigitosRbf.py                # Experimento local con SVC(kernel='rbf', C=5)
+├── static/img/                            # Logos y recursos estáticos de la web
+├── templates/index.html                   # Interfaz gráfica del laboratorio web
+├── app.py                                 # Servidor Flask y API REST
+├── digitos.py                             # Script clásico de entrenamiento, métricas y gráficos
+├── contexto.md                            # Bitácora técnica e ideas futuras del proyecto
+└── requirements.txt                       # Dependencias de Python
+```
+
+---
+
+## Instalación y ejecución
 
 ### 1. Clonar el repositorio
 
@@ -145,164 +157,148 @@ git clone https://github.com/TeVerde29/DetectIA.git
 cd DetectIA
 ```
 
-### 2. Configurar el entorno de Python
+### 2. Configurar el entorno Python y ejecutar el laboratorio web
 
 ```bash
 python -m venv .venv
-# En Windows (PowerShell):
+
+# Windows (PowerShell):
 .venv\Scripts\Activate.ps1
-# En Linux / macOS:
+# Linux / macOS:
 source .venv/bin/activate
 
 pip install -r requirements.txt
 ```
 
-### 3. Iniciar el laboratorio web
+> [!NOTE]
+> La carpeta `modelos/` está excluida en `.gitignore`. Antes de iniciar `app.py` en una copia recién clonada, asegúrate de generar los artefactos en `modelos/svm/` (`info.json`, `modelo_svm.joblib`, `metricas_svm.json`) y `modelos/datos_test.npz` (por ejemplo, ejecutando `artefactos_detectia_Rapido/DetectIA_Fase1_Colab_Rapido.ipynb` o `digitos.py`).
+
+Inicia el servidor Flask:
 
 ```bash
 python app.py
 ```
 
-El servidor quedará a la escucha en `http://127.0.0.1:5000`.
+El servidor escucha en `http://127.0.0.1:5000`.
 
-### 4. Compilar la aplicación Android
+### 3. Compilar la aplicación Android
 
 Desde el directorio del proyecto móvil:
 
 ```bash
 cd "Proyecto Feria/DetectIA"
-# En Windows:
+
+# Windows:
 .\gradlew.bat assembleDebug
-# En Linux / macOS:
+# Linux / macOS:
 ./gradlew assembleDebug
 ```
 
-El archivo APK generado se ubicará en:
-`Proyecto Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk`
+El APK de depuración se genera en `Proyecto Feria/DetectIA/app/build/outputs/apk/debug/app-debug.apk`.
 
-### Flujo básico de uso
+### 4. Pruebas configuradas
 
-1. **Selección de modalidad:** Abrir la aplicación móvil o ingresar al laboratorio web en el navegador.
-2. **Dibujo de trazo:** Dibujar con el ratón o con el dedo un dígito del 0 al 9 en el lienzo central.
-3. **Ejecución de inferencia:** Pulsar sobre el botón principal **"Predecir Número"**.
-4. **Análisis de resultados:** Observar la miniatura procesada de $28 \times 28$, la clase predicha con mayor probabilidad y el desglose de afinidad Softmax.
-5. **Modo comparativo (Web):** Seleccionar la opción de dos modelos simultáneos para contrastar la hipótesis de corte del modelo lineal frente a la red neuronal.
+* **Android**: El proyecto incluye la configuración estándar de JUnit 4 en `Proyecto Feria/DetectIA/app/src/test/java/unu/edu/detectia/ExampleUnitTest.kt` (`.\gradlew.bat test`), sin pruebas unitarias aún para el clasificador ni el preprocesador.
+* **Python**: No hay una suite de pruebas automatizadas configurada en el repositorio.
 
-## Requisitos del sistema
-
-| Componente | Requisito mínimo | Requisito recomendado |
-| :--- | :--- | :--- |
-| Sistema Operativo (Servidor) | Windows 10 / Ubuntu 20.04 / macOS 12 | Windows 11 / Linux x86_64 |
-| Dispositivo Móvil (Cliente) | Android 7.0 (API 24 - Nougat) | Android 11.0 o superior (API 30+) |
-| Memoria RAM (Servidor) | 4 GB | 8 GB |
-| Memoria RAM (Dispositivo móvil) | 2 GB | 4 GB |
-| Procesador (CPU Servidor) | Dual-core 2.0 GHz | Quad-core 3.0 GHz |
-| Espacio en disco | 600 MB libres | 1.5 GB libres |
-| Entorno de ejecución | Python 3.11+ / Java JDK 17+ | Python 3.11 / JDK 17 / Android Studio |
+---
 
 ## Especificación de la API REST
 
-El servidor `app.py` expone las siguientes rutas de servicio:
+Rutas expuestas por [`app.py`](app.py):
 
-```text
-GET  /                          Renderiza la interfaz gráfica interactiva.
-GET  /api/modelos               Lista los modelos registrados y sus metadatos de exactitud.
-POST /api/predecir-dibujo       Recibe una imagen en Base64 o array de 784 px y devuelve la predicción.
-GET  /api/muestra/<int:idx>     Recupera un vector del conjunto de test por índice (0 a 10.499).
-GET  /api/aleatorio             Retorna una muestra aleatoria del conjunto de prueba.
-GET  /api/siguiente-discrepancia Devuelve la siguiente muestra donde SVM y Red Neuronal difieren.
-GET  /api/siguiente-error       Retorna la siguiente muestra fallada por el modelo especificado.
-```
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/` | Renderiza la interfaz web (`templates/index.html`). |
+| `GET` | `/api/modelos` | Devuelve la lista de modelos cargados desde `modelos/*/info.json`. |
+| `POST` | `/api/predecir-dibujo` | Recibe `imagen_base64` o un vector `pixeles` (784 valores) y `modelo_id`, ejecuta el preprocesamiento y devuelve la predicción y puntajes Softmax. |
+| `GET` | `/api/muestra/<int:idx>` | Evalúa y devuelve una muestra del conjunto de prueba (`0` a `10.499`). |
+| `GET` | `/api/aleatorio` | Selecciona y evalúa una muestra aleatoria del conjunto de prueba. |
+| `GET` | `/api/siguiente-error` | Devuelve la siguiente muestra fallada por el modelo indicado (`?modelo=svm&actual=-1`). |
+| `GET` | `/api/siguiente-discrepancia` | Busca la siguiente muestra donde difieren dos modelos (requiere al menos 2 modelos cargados en `modelos/`). |
 
-### Ejemplo de petición y respuesta en `/api/predecir-dibujo`
+### Ejemplo de petición y respuesta en `POST /api/predecir-dibujo`
 
-**Petición (JSON):**
 ```json
 {
   "imagen_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-  "modelo_id": "ambos"
+  "modelo_id": "svm"
 }
 ```
 
-**Respuesta (JSON):**
 ```json
 {
-  "modo": "ambos",
+  "modo": "svm",
   "coinciden": true,
-  "prediccion": 3,
-  "confianza": 75.0,
-  "latencia_ms": 1.25,
+  "pixeles_procesados": [0, 0, "... (784 enteros 0-255)"],
   "modelos": {
     "svm": {
+      "id": "svm",
       "nombre": "SVM Lineal",
+      "familia": "Máquina de Soporte Vectorial (SVC)",
       "prediccion": 3,
       "confianza": 75.0,
       "latencia_ms": 0.82,
       "puntajes": [0.0, 0.0, 10.0, 75.0, 0.0, 0.0, 0.0, 0.0, 10.0, 5.0]
-    },
-    "cnn": {
-      "nombre": "Red Neuronal MLP",
-      "prediccion": 3,
-      "confianza": 94.2,
-      "latencia_ms": 0.43,
-      "puntajes": [0.1, 0.0, 0.5, 94.2, 0.0, 2.1, 0.0, 0.1, 2.5, 0.5]
     }
-  }
+  },
+  "prediccion": 3,
+  "confianza": 75.0,
+  "latencia_ms": 0.82,
+  "puntajes": [0.0, 0.0, 10.0, 75.0, 0.0, 0.0, 0.0, 0.0, 10.0, 5.0]
 }
 ```
 
+---
+
 ## Preprocesamiento matemático MNIST
 
-Para que la clasificación sea robusta ante dibujos realizados en lienzos de alta resolución, la imagen se somete al siguiente pipeline:
+Tanto [`preprocesar_imagen_mnist`](app.py#L30-L73) en Python como [`MnistPreprocessor.process`](Proyecto%20Feria/DetectIA/app/src/main/java/unu/edu/detectia/MnistPreprocessor.kt#L35-L145) en Kotlin aplican la misma secuencia base:
 
-1. **Aislamiento de la región activa:** Se calcula la caja delimitadora $[x_{\min}, y_{\min}, x_{\max}, y_{\max}]$ descartando los píxeles de fondo.
-2. **Escalado con conservación de relación de aspecto:** La dimensión mayor de la caja se redimensiona a 20 píxeles usando interpolación Lanczos, ajustando proporcionalmente la otra dimensión:
-   $$\text{escala} = \frac{20}{\max(w, h)}$$
-3. **Cálculo del centro de masa:** Sobre el lienzo de $28 \times 28$, se obtienen las coordenadas baricéntricas ponderadas por la intensidad de cada píxel $I(x, y)$:
+1. **Aislamiento de la región activa (*Bounding Box*)**: Se localizan los límites `[x_min, y_min, x_max, y_max]` de los píxeles del trazo.
+2. **Escalado proporcional a `20x20`**: El lado mayor se ajusta a 20 píxeles conservando la relación de aspecto (filtro Lanczos en Python; escalado filtrado en Android).
+3. **Cálculo del centro de masa**: Se obtienen las coordenadas baricéntricas `(cx, cy)` ponderadas por intensidad `I(x, y)`:
    $$c_x = \frac{\sum x \cdot I(x, y)}{\sum I(x, y)}, \quad c_y = \frac{\sum y \cdot I(x, y)}{\sum I(x, y)}$$
-4. **Desplazamiento subpíxel:** La matriz se traslada para alinear su centro de masa con el centro geométrico oficial de MNIST en $(13.5, 13.5)$:
-   $$\Delta x = 13.5 - c_x, \quad \Delta y = 13.5 - c_y$$
+4. **Centrado en `28x28` y normalización**: Se traslada el trazo para alinear su centro de masa con `(13.5, 13.5)` y se normalizan los 784 píxeles al rango `[0.0, 1.0]` dividiendo entre `255.0`.
+
+---
 
 ## Motor de inferencia Android One-vs-One
 
-El clasificador móvil no requiere librerías externas ni intérpretes de red neuronal. Ejecuta la formulación algebraica multiclase de *Support Vector Classifier* bajo la estrategia One-vs-One (OvO):
-
-Para $K = 10$ clases, se evalúan $N = \frac{K(K - 1)}{2} = 45$ hiperplanos binarios independientes. Cada clasificador $k$ entre la clase $i$ y la clase $j$ calcula el producto escalar:
+[`SvmLinearClassifier.kt`](Proyecto%20Feria/DetectIA/app/src/main/java/unu/edu/detectia/SvmLinearClassifier.kt) reproduce la decisión multiclase *One-vs-One* de `scikit-learn` (`SVC(kernel='linear')`) para $K = 10$ clases ($45$ clasificadores binarios):
 
 $$d_k = \mathbf{w}_k \cdot \mathbf{x} + b_k = \sum_{f=0}^{783} w_{k, f} \cdot x_f + b_k$$
 
-- Si $d_k > 0$, se suma un voto a la clase $i$ y se acumula $d_k$ en su confianza continua.
-- Si $d_k \le 0$, se suma un voto a la clase $j$ y se resta $d_k$ en su confianza continua.
-
-La clase final predicha corresponde a aquella con mayor número de votos acumulados. Posteriormente, las puntuaciones continuas normalizadas se transforman en porcentajes mediante la función Softmax:
-
-$$P(\text{clase } c) = \frac{e^{\sigma \cdot s_c}}{\sum_{m=0}^{9} e^{\sigma \cdot s_m}} \times 100\%$$
-
-## Comparativa de modelos
-
-Evaluación realizada sobre el conjunto de prueba independiente de 10.500 imágenes (`modelos/datos_test.npz`):
-
-| Métrica / Parámetro | SVM Lineal (`LinearSVC`) | Red Neuronal Artificial (`MLPClassifier`) |
-| :--- | :--- | :--- |
-| Exactitud global (*Accuracy*) | **93.11%** | **97.34%** |
-| Aciertos en test | 9.777 de 10.500 | 10.221 de 10.500 |
-| Errores en test | 723 de 10.500 | 279 de 10.500 |
-| Tiempo de entrenamiento | 76.47 segundos | 29.61 segundos |
-| Tiempo de inferencia (Web batch) | 28.23 segundos (2.6 ms/muestra) | 0.03 segundos (0.003 ms/muestra) |
-| Latencia móvil unitaria (Android) | **0.23 ms - 0.32 ms** | N/A (Solo servidor) |
-| Peso del modelo exportado | 268 KB (JSON de coeficientes) | 3.2 MB (Joblib) |
-| Dependencia de ejecución | Kotlin puro / Sin librerías | scikit-learn / Servidor |
-
-## Licencia
-
-Este proyecto se distribuye bajo la licencia **MIT**.
+* Si $d_k > 0$, suma un voto a la clase $i$; en caso contrario, suma un voto a la clase $j$, acumulando además las distancias firmadas para el desempate continuo y su conversión a porcentajes mediante Softmax.
+* [`exportar_modelo_android.py`](Proyecto%20Feria/exportar_modelo_android.py) verifica que la implementación manual coincida con `modelo.predict()` antes de copiar el JSON a `app/src/main/assets/`.
 
 ---
 
-**Té Verde** (@TeVerde29)  
-GitHub: [https://github.com/TeVerde29](https://github.com/TeVerde29)  
-Contacto: hikih020@gmail.com
+## Métricas del modelo actual
+
+Resultados registrados en [`modelos/svm/metricas_svm.json`](modelos/svm/metricas_svm.json) sobre el conjunto de prueba de `10.500` muestras (`random_state=42`, normalizado):
+
+| Parámetro / Métrica | Valor registrado (`SVC(kernel='linear')`) |
+| :--- | :--- |
+| Muestras totales (`digitos.csv`) | 42.000 (31.500 entrenamiento / 10.500 prueba) |
+| Exactitud en prueba (*Accuracy*) | **93.11%** (`0.9311428571428572`) |
+| Aciertos en prueba | 9.777 de 10.500 |
+| Errores en prueba | 723 de 10.500 |
+| Tiempo de entrenamiento | 76.47 s |
+| Tiempo de predicción (batch 10.500 muestras) | 28.23 s |
 
 ---
 
-Si este proyecto te resultó útil, considera darle una estrella en GitHub.
+## Limitaciones y estado del proyecto
+
+* **Modelo único activo**: Actualmente solo está entrenado y conectado el modelo **SVM Lineal (`SVC(kernel='linear')`)**. La arquitectura de `app.py` ya soporta múltiples modelos en `modelos/`, pero el entrenamiento e integración de una **Red Neuronal Convolucional (CNN)** queda pendiente para una etapa posterior (documentada como idea y roadmap en [`contexto.md`](contexto.md)).
+* **Artefactos fuera de Git**: La carpeta `modelos/` y los `.apk` compilados están ignorados en Git, por lo que requieren generación local tras clonar el repositorio.
+* **Diferencias menores en preprocesamiento**: `app.py` aplica estiramiento de contraste al máximo y desplazamiento subpíxel (`scipy.ndimage.shift`), mientras que `MnistPreprocessor.kt` usa redondeo entero de desplazamiento sobre Android `Bitmap`.
+* **Documentación histórica de Fase 1**: Los archivos [`desarrollo/analisis.md`](desarrollo/analisis.md) y [`desarrollo/diseno.md`](desarrollo/diseno.md) corresponden al planteamiento inicial (PWA) antes de migrar a Flask + Android nativo.
+
+---
+
+## Licencia y autor
+
+* **Licencia**: No se ha encontrado un archivo `LICENSE` en la raíz del repositorio.
+* **Autor**: **Té Verde** (`@TeVerde29`) — [GitHub](https://github.com/TeVerde29)

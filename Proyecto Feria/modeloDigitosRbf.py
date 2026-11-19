@@ -8,7 +8,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # 1. Carga de datos
-df = pd.read_csv('digitos.csv')
+ruta_csv = next(
+    (p for p in ['digitos.csv', os.path.join('..', 'datos', 'digitos.csv'), os.path.join('datos', 'digitos.csv')] if os.path.exists(p)),
+    'digitos.csv'
+)
+df = pd.read_csv(ruta_csv)
 X = df.iloc[:, 1:785].values.astype(np.float32) / 255.0
 y = df.iloc[:, 0].values
 
