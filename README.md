@@ -49,7 +49,11 @@ El proyecto integra dos entornos complementarios:
 
 ![Curvas por épocas de la CNN Residual](modelos/cnn/img/cnn_curvas_epocas.png)
 
+![Matriz de confusión de la CNN Residual (99.84%)](modelos/cnn/img/cnn_matriz_confusion.png)
+
 ![Exactitud de la CNN en MNIST y EMNIST](modelos/cnn/img/cnn_benchmarks_datasets.png)
+
+![Matriz de confusión del modelo SVM Lineal (93.81%)](img/matriz_confusion.png)
 
 ![Curva de aprendizaje SVC Lineal](img/curva_aprendizaje_svc.png)
 
