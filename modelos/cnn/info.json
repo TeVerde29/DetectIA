@@ -1,0 +1,11 @@
+{
+  "id": "cnn",
+  "nombre": "Red Neuronal CNN",
+  "familia": "CNN Residual (ONNX)",
+  "tipo": "onnx",
+  "archivo_modelo": "modelo_cnn.onnx",
+  "archivo_metricas": "metricas_cnn.json",
+  "archivo_historial": "historial_epocas.json",
+  "accuracy_pct": 99.84,
+  "normalizado": true
+}

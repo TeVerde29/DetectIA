@@ -53,11 +53,22 @@ function seleccionarModoModelo(mId) {
 }
 
 // --- PESTAÑAS ---
+let entrenamientoCargado = false;
+
 function cambiarPestana(p) {
   document.getElementById("tabBtnDraw").classList.toggle("active", p === "draw");
   document.getElementById("tabBtnExplorer").classList.toggle("active", p === "explorer");
+  const tabTraining = document.getElementById("tabBtnTraining");
+  if (tabTraining) tabTraining.classList.toggle("active", p === "training");
+
   document.getElementById("viewDraw").classList.toggle("active", p === "draw");
   document.getElementById("viewExplorer").classList.toggle("active", p === "explorer");
+  const viewTraining = document.getElementById("viewTraining");
+  if (viewTraining) viewTraining.classList.toggle("active", p === "training");
+
+  if (p === "training" && !entrenamientoCargado) {
+    cargarDatosEntrenamiento();
+  }
 }
 
 // --- LIENZO DE DIBUJO ---
@@ -354,6 +365,23 @@ function crearTarjetaModelo(mod, mostrarAcierto = false) {
       : `<span class="badge-verdict incorrect">❌ Fallo</span>`;
   }
 
+  let juryHtml = "";
+  if (Array.isArray(mod.votos_detalle) && mod.votos_detalle.length > 0) {
+    const chips = mod.votos_detalle.map(v => {
+      const esGanador = v.prediccion === mod.prediccion;
+      return `<span class="jury-chip ${esGanador ? "winner" : ""}">${v.nombre}: <strong>${v.prediccion}</strong> (${v.confianza}%)</span>`;
+    }).join("");
+    juryHtml = `
+      <div class="jury-box">
+        <div class="jury-header">
+          <span>Votación del Jurado</span>
+          <span><strong>${mod.votos_ganador}/${mod.total_jurado}</strong> votos</span>
+        </div>
+        <div class="jury-chips">${chips}</div>
+      </div>
+    `;
+  }
+
   card.innerHTML = `
     <div class="model-card-header">
       <div>
@@ -370,6 +398,7 @@ function crearTarjetaModelo(mod, mostrarAcierto = false) {
         <span>Latencia: <strong>${mod.latencia_ms} ms</strong></span>
       </div>
     </div>
+    ${juryHtml}
     <div>
       <div class="affinity-section-title">Distribución de Afinidades (0–9)</div>
       <div class="bars-list" id="bars_${mod.id}"></div>
@@ -588,6 +617,159 @@ document.getElementById("btnSiguienteError").addEventListener("click", async () 
 });
 
 chkCuadricula.addEventListener("change", () => renderizarMuestraExplorer(ultimosPixelesExplorer));
+
+// --- PESTAÑA ÉPOCAS Y GRÁFICAS ---
+async function cargarDatosEntrenamiento() {
+  entrenamientoCargado = true;
+  try {
+    const res = await fetch("/api/entrenamiento");
+    const data = await res.json();
+
+    const historiales = data.historiales || [];
+    const chip = document.getElementById("trainingModelsChip");
+    if (historiales.length > 0 && Array.isArray(historiales[0].epocas) && historiales[0].epocas.length > 0) {
+      const h = historiales[0];
+      const epocas = h.epocas;
+      chip.textContent = `${h.modelo || h.model_id} · ${epocas.length} épocas`;
+      document.getElementById("epochsEmptyMsg").style.display = "none";
+      document.getElementById("epochsGrid").style.display = "grid";
+
+      const labels = epocas.map(e => e.epoca);
+      dibujarCurvaEpocas(
+        document.getElementById("epochAccCanvas"),
+        labels,
+        [
+          { nombre: "Train Acc", color: "#1a73e8", valores: epocas.map(e => e.train_acc) },
+          { nombre: "Val Acc", color: "#1e8e3e", valores: epocas.map(e => e.val_acc) }
+        ],
+        "%"
+      );
+      dibujarCurvaEpocas(
+        document.getElementById("epochLossCanvas"),
+        labels,
+        [
+          { nombre: "Train Loss", color: "#1a73e8", valores: epocas.map(e => e.train_loss) },
+          { nombre: "Val Loss", color: "#d93025", valores: epocas.map(e => e.val_loss) }
+        ],
+        ""
+      );
+    } else {
+      chip.textContent = "Sin historial CNN aún";
+    }
+
+    renderizarBenchmarks(data.benchmarks || []);
+    renderizarGaleria(data.galeria || []);
+  } catch (err) {
+    document.getElementById("trainingModelsChip").textContent = "Error al cargar";
+  }
+}
+
+function dibujarCurvaEpocas(canvas, labels, series, sufijo) {
+  if (!canvas || !labels.length) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  const padL = 48, padR = 16, padT = 24, padB = 28;
+  ctx.clearRect(0, 0, w, h);
+
+  const allVals = series.flatMap(s => s.valores).filter(v => typeof v === "number");
+  let minV = Math.min(...allVals);
+  let maxV = Math.max(...allVals);
+  if (maxV === minV) { maxV += 1; minV -= 1; }
+  const margin = (maxV - minV) * 0.1;
+  minV -= margin;
+  maxV += margin;
+
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue("--text-2").trim() || "#444746";
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue("--grid-line").trim() || "rgba(0,0,0,0.08)";
+
+  ctx.strokeStyle = gridColor;
+  ctx.fillStyle = textColor;
+  ctx.font = "11px Roboto Mono, monospace";
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (plotH * i) / 4;
+    const val = maxV - ((maxV - minV) * i) / 4;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(w - padR, y);
+    ctx.stroke();
+    ctx.fillText(`${val.toFixed(sufijo === "%" ? 1 : 3)}${sufijo}`, 4, y + 4);
+  }
+
+  series.forEach((s, sIdx) => {
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    s.valores.forEach((v, idx) => {
+      const x = padL + (labels.length === 1 ? plotW / 2 : (plotW * idx) / (labels.length - 1));
+      const y = padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
+      if (idx === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = s.color;
+    ctx.fillText(s.nombre, padL + sIdx * 105, 14);
+  });
+}
+
+function renderizarBenchmarks(benchmarks) {
+  const container = document.getElementById("benchmarksContainer");
+  if (!benchmarks.length) {
+    container.innerHTML = `<div class="training-empty">Sin métricas registradas todavía.</div>`;
+    return;
+  }
+  const rows = benchmarks.map(b => {
+    const m = b.metricas || {};
+    const testAcc = m.accuracy ? `${(m.accuracy * 100).toFixed(2)}%` : (b.accuracy_pct ? `${b.accuracy_pct}%` : "—");
+    const trainAcc = m.accuracy_train ? `${(m.accuracy_train * 100).toFixed(2)}%` : "—";
+    const tiempo = m.tiempo_entrenamiento_seg ? `${m.tiempo_entrenamiento_seg} s` : "—";
+    const extraBench = m.benchmarks
+      ? Object.entries(m.benchmarks).map(([k, v]) => `${k}: <strong>${v.accuracy_pct}%</strong>`).join(" · ")
+      : `${m.aciertos ?? "—"}/${m.muestras_prueba ?? "—"} aciertos`;
+    return `
+      <tr>
+        <td><strong>${b.nombre}</strong></td>
+        <td>${trainAcc}</td>
+        <td><strong>${testAcc}</strong></td>
+        <td>${tiempo}</td>
+        <td>${extraBench}</td>
+      </tr>
+    `;
+  }).join("");
+
+  container.innerHTML = `
+    <table class="benchmarks-table">
+      <thead>
+        <tr>
+          <th>Modelo</th>
+          <th>Train Accuracy</th>
+          <th>Test Accuracy</th>
+          <th>Tiempo Entrenamiento</th>
+          <th>Detalle / Datasets</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderizarGaleria(galeria) {
+  const grid = document.getElementById("galleryGrid");
+  document.getElementById("galleryCountChip").textContent = `${galeria.length} gráficos`;
+  if (!galeria.length) {
+    grid.innerHTML = `<div class="training-empty">No se encontraron imágenes de gráficas.</div>`;
+    return;
+  }
+  grid.innerHTML = galeria.map(item => `
+    <div class="gallery-card">
+      <img src="${item.url}" alt="${item.titulo}" loading="lazy" />
+      <div class="gallery-card-title">${item.titulo}</div>
+    </div>
+  `).join("");
+}
 
 // Inicializar tema y vista inicial
 const temaGuardado = localStorage.getItem("detectia-theme") === "dark";

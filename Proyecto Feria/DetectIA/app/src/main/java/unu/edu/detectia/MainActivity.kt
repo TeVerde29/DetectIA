@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private val backgroundExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     @Volatile
-    private var classifier: SvmLinearClassifier? = null
+    private var classifier: CnnOnnxClassifier? = null
     private var currentPreviewBitmap: Bitmap? = null
 
     private data class TopRowViews(
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         bindViews()
         updateThemeToggleUi(isNightModeActive())
         setupListeners()
-        loadSvmModelAsync()
+        loadCnnModelAsync()
     }
 
     private fun bindViews() {
@@ -151,10 +151,10 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(newMode)
     }
 
-    private fun loadSvmModelAsync() {
+    private fun loadCnnModelAsync() {
         backgroundExecutor.execute {
             try {
-                val loaded = SvmLinearClassifier.loadFromAssets(applicationContext)
+                val loaded = CnnOnnxClassifier.loadFromAssets(applicationContext)
                 classifier = loaded
                 runOnUiThread {
                     if (!isFinishing && !isDestroyed) {
@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                     if (!isFinishing && !isDestroyed) {
                         Toast.makeText(
                             this,
-                            "No se pudo cargar modelo_linear_android.json: ${e.message}",
+                            "No se pudo cargar modelo_cnn.onnx: ${e.message}",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -199,7 +199,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displayPrediction(
-        prediction: SvmPredictionResult,
+        prediction: CnnPredictionResult,
         preview28: Bitmap
     ) {
         tvPredictedDigit.text = prediction.predictedDigit.toString()
@@ -282,6 +282,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        classifier?.close()
+        classifier = null
         currentPreviewBitmap?.let { bmp ->
             if (!bmp.isRecycled) bmp.recycle()
         }

@@ -13,8 +13,13 @@ from time import perf_counter
 import joblib
 import numpy as np
 from PIL import Image
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from scipy.ndimage import center_of_mass, shift
+
+try:
+    import onnxruntime as ort
+except ImportError:
+    ort = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
@@ -111,78 +116,213 @@ def cargar_modelos_y_datos():
             with open(info_path, "r", encoding="utf-8") as f:
                 info = json.load(f)
 
-            mod_filename = info.get("archivo_modelo")
-            mod_path = os.path.join(dir_path, mod_filename)
-            if not os.path.exists(mod_path):
-                continue
-
-            instancia = joblib.load(mod_path)
+            tipo = info.get("tipo", "joblib")
             model_id = info.get("id", sub)
-            modelos_registrados[model_id] = {
-                "id": model_id,
-                "info": info,
-                "instancia": instancia,
-                "normalizado": info.get("normalizado", True),
-            }
+
+            if tipo == "onnx":
+                if ort is None:
+                    continue
+                mod_filename = info.get("archivo_modelo")
+                mod_path = os.path.join(dir_path, mod_filename) if mod_filename else ""
+                if not mod_path or not os.path.exists(mod_path):
+                    continue
+                sess = ort.InferenceSession(mod_path, providers=["CPUExecutionProvider"])
+                modelos_registrados[model_id] = {
+                    "id": model_id,
+                    "tipo": "onnx",
+                    "dir_path": dir_path,
+                    "info": info,
+                    "instancia": sess,
+                    "input_name": sess.get_inputs()[0].name,
+                    "normalizado": info.get("normalizado", True),
+                }
+            elif tipo == "onnx_ensemble":
+                if ort is None:
+                    continue
+                sesiones = []
+                for item in info.get("modelos_onnx", []):
+                    fname = item.get("archivo") if isinstance(item, dict) else item
+                    m_name = item.get("nombre", fname) if isinstance(item, dict) else fname
+                    m_path = os.path.join(dir_path, fname)
+                    if os.path.exists(m_path):
+                        sess = ort.InferenceSession(m_path, providers=["CPUExecutionProvider"])
+                        sesiones.append({
+                            "nombre": m_name,
+                            "session": sess,
+                            "input_name": sess.get_inputs()[0].name,
+                        })
+                if not sesiones:
+                    continue
+                modelos_registrados[model_id] = {
+                    "id": model_id,
+                    "tipo": "onnx_ensemble",
+                    "dir_path": dir_path,
+                    "info": info,
+                    "instancia": sesiones,
+                    "normalizado": info.get("normalizado", True),
+                }
+            else:
+                mod_filename = info.get("archivo_modelo")
+                mod_path = os.path.join(dir_path, mod_filename) if mod_filename else ""
+                if not mod_path or not os.path.exists(mod_path):
+                    continue
+                instancia = joblib.load(mod_path)
+                modelos_registrados[model_id] = {
+                    "id": model_id,
+                    "tipo": "joblib",
+                    "dir_path": dir_path,
+                    "info": info,
+                    "instancia": instancia,
+                    "normalizado": info.get("normalizado", True),
+                }
 
     # 3. Cargar o precalcular índices de discrepancias entre los dos primeros modelos
     disc_cache_path = os.path.join(CARPETA_MODELOS, "discrepancias.json")
-    if os.path.exists(disc_cache_path):
+    ids = list(modelos_registrados.keys())
+    if len(ids) >= 2 and os.path.exists(disc_cache_path):
         try:
             with open(disc_cache_path, "r", encoding="utf-8") as f:
                 data_disc = json.load(f)
-                indices_discrepancias = data_disc.get("indices", [])
+                if data_disc.get("modelos") == ids[:2]:
+                    indices_discrepancias = data_disc.get("indices", [])
         except Exception:
             indices_discrepancias = []
-    
-    if not indices_discrepancias:
-        ids = list(modelos_registrados.keys())
-        if len(ids) >= 2 and X_test is not None:
-            m1 = modelos_registrados[ids[0]]["instancia"]
-            m2 = modelos_registrados[ids[1]]["instancia"]
-            X_eval = X_test.astype(np.float32) / 255.0
-            p1 = m1.predict(X_eval)
-            p2 = m2.predict(X_eval)
-            indices_discrepancias = np.where(p1 != p2)[0].tolist()
-            try:
-                with open(disc_cache_path, "w", encoding="utf-8") as f:
-                    json.dump({"indices": indices_discrepancias, "total": len(indices_discrepancias)}, f)
-            except Exception:
-                pass
+
+    if len(ids) >= 2 and not indices_discrepancias and X_test is not None:
+        p1 = predecir_batch_modelo(modelos_registrados[ids[0]], X_test)
+        p2 = predecir_batch_modelo(modelos_registrados[ids[1]], X_test)
+        indices_discrepancias = np.where(p1 != p2)[0].tolist()
+        try:
+            with open(disc_cache_path, "w", encoding="utf-8") as f:
+                json.dump({"modelos": ids[:2], "indices": indices_discrepancias, "total": len(indices_discrepancias)}, f)
+        except Exception:
+            pass
+
+
+def _resolver_votacion_onnx(sesiones, x_4d):
+    """Ejecuta múltiples sesiones ONNX y resuelve Hard Voting + Soft Voting de desempate."""
+    votos_detalle = []
+    conteo_votos = [0] * 10
+    suma_probs = np.zeros(10, dtype=np.float64)
+
+    for s in sesiones:
+        logits = s["session"].run(None, {s["input_name"]: x_4d})[0][0]
+        probs = softmax(logits, escala=1.0)
+        voto = int(np.argmax(probs))
+        conteo_votos[voto] += 1
+        suma_probs += probs
+        votos_detalle.append({
+            "nombre": s["nombre"],
+            "prediccion": voto,
+            "confianza": round(float(probs[voto]), 2),
+        })
+
+    probs_promedio = suma_probs / len(sesiones)
+    max_votos = max(conteo_votos)
+    empatados = [c for c, v in enumerate(conteo_votos) if v == max_votos]
+    prediccion = max(empatados, key=lambda c: float(probs_promedio[c]))
+
+    return {
+        "prediccion": int(prediccion),
+        "puntajes_pct": [round(float(p), 2) for p in probs_promedio],
+        "votos_ganador": int(conteo_votos[prediccion]),
+        "total_jurado": len(sesiones),
+        "conteo_votos": conteo_votos,
+        "votos_detalle": votos_detalle,
+    }
+
+
+def predecir_batch_modelo(mod_entry, X_u8, batch_size=512):
+    """Predice etiquetas para todo un array uint8 (N, 784) soportando joblib, onnx y onnx_ensemble."""
+    tipo = mod_entry.get("tipo", "joblib")
+    es_norm = mod_entry.get("normalizado", True)
+    X_eval = (X_u8.astype(np.float32) / 255.0) if es_norm else X_u8.astype(np.float32)
+
+    if tipo == "onnx":
+        sess = mod_entry["instancia"]
+        in_name = mod_entry["input_name"]
+        preds = []
+        for i in range(0, len(X_eval), batch_size):
+            xb = X_eval[i:i + batch_size].reshape(-1, 1, 28, 28)
+            logits = sess.run(None, {in_name: xb})[0]
+            preds.append(np.argmax(logits, axis=1))
+        return np.concatenate(preds)
+
+    if tipo == "onnx_ensemble":
+        sesiones = mod_entry["instancia"]
+        preds = []
+        for i in range(0, len(X_eval), batch_size):
+            xb = X_eval[i:i + batch_size].reshape(-1, 1, 28, 28)
+            votos_batch = np.zeros((len(xb), 10), dtype=np.int32)
+            probs_sum = np.zeros((len(xb), 10), dtype=np.float64)
+            for s in sesiones:
+                logits = s["session"].run(None, {s["input_name"]: xb})[0]
+                exp_l = np.exp(logits - np.max(logits, axis=1, keepdims=True))
+                probs = exp_l / np.sum(exp_l, axis=1, keepdims=True)
+                votos_idx = np.argmax(probs, axis=1)
+                votos_batch[np.arange(len(xb)), votos_idx] += 1
+                probs_sum += probs
+            # Hard voting + soft voting tie-break
+            scores = votos_batch.astype(np.float64) + (probs_sum / (len(sesiones) + 1.0))
+            preds.append(np.argmax(scores, axis=1))
+        return np.concatenate(preds)
+
+    return mod_entry["instancia"].predict(X_eval)
 
 
 def inferir_con_modelo(mod_entry, pixeles_vector):
     """Ejecuta inferencia con un modelo específico y retorna predicción, puntajes y latencia."""
+    tipo = mod_entry.get("tipo", "joblib")
     instancia = mod_entry["instancia"]
     es_norm = mod_entry.get("normalizado", True)
-    pixeles_eval = (pixeles_vector.astype(np.float32) / 255.0) if es_norm else pixeles_vector
+    pixeles_eval = (pixeles_vector.astype(np.float32) / 255.0) if es_norm else pixeles_vector.astype(np.float32)
 
     inicio = perf_counter()
-    prediccion = int(instancia.predict([pixeles_eval])[0])
+    extra = {}
 
-    # Cálculo de puntajes y afinidades según el tipo de clasificador
-    if hasattr(instancia, "predict_proba"):
-        probs = instancia.predict_proba([pixeles_eval])[0]
-        puntajes_pct = [round(float(p * 100.0), 2) for p in probs]
-    elif hasattr(instancia, "decision_function"):
-        decision = instancia.decision_function([pixeles_eval])[0]
-        puntajes_pct = [round(float(p), 2) for p in softmax(decision)]
+    if tipo == "onnx":
+        x_4d = pixeles_eval.reshape(1, 1, 28, 28)
+        logits = instancia.run(None, {mod_entry["input_name"]: x_4d})[0][0]
+        puntajes_pct = [round(float(p), 2) for p in softmax(logits, escala=1.0)]
+        prediccion = int(np.argmax(logits))
+    elif tipo == "onnx_ensemble":
+        x_4d = pixeles_eval.reshape(1, 1, 28, 28)
+        res_ens = _resolver_votacion_onnx(instancia, x_4d)
+        prediccion = res_ens["prediccion"]
+        puntajes_pct = res_ens["puntajes_pct"]
+        extra = {
+            "votos_ganador": res_ens["votos_ganador"],
+            "total_jurado": res_ens["total_jurado"],
+            "conteo_votos": res_ens["conteo_votos"],
+            "votos_detalle": res_ens["votos_detalle"],
+        }
     else:
-        puntajes_pct = [0.0] * 10
-        puntajes_pct[prediccion] = 100.0
+        prediccion = int(instancia.predict([pixeles_eval])[0])
+        if hasattr(instancia, "predict_proba"):
+            probs = instancia.predict_proba([pixeles_eval])[0]
+            puntajes_pct = [round(float(p * 100.0), 2) for p in probs]
+        elif hasattr(instancia, "decision_function"):
+            decision = instancia.decision_function([pixeles_eval])[0]
+            puntajes_pct = [round(float(p), 2) for p in softmax(decision)]
+        else:
+            puntajes_pct = [0.0] * 10
+            puntajes_pct[prediccion] = 100.0
 
     latencia_ms = (perf_counter() - inicio) * 1000.0
     confianza = puntajes_pct[prediccion]
 
-    return {
+    resultado = {
         "id": mod_entry["id"],
         "nombre": mod_entry["info"].get("nombre", mod_entry["id"]),
         "familia": mod_entry["info"].get("familia", ""),
+        "tipo": tipo,
         "prediccion": prediccion,
         "confianza": confianza,
         "puntajes": puntajes_pct,
         "latencia_ms": round(latencia_ms, 2),
     }
+    resultado.update(extra)
+    return resultado
 
 
 # ==============================================================================
@@ -322,18 +462,19 @@ def siguiente_error():
         return jsonify({"error": f"Modelo '{modelo_id}' no encontrado."}), 404
 
     # Cargar métricas del modelo si existen
-    dir_path = os.path.join(CARPETA_MODELOS, modelo_id)
+    dir_path = mod_entry.get("dir_path") or os.path.join(CARPETA_MODELOS, modelo_id)
     met_filename = mod_entry["info"].get("archivo_metricas")
     met_path = os.path.join(dir_path, met_filename) if met_filename else None
 
+    errores = None
     if met_path and os.path.exists(met_path):
         with open(met_path, "r", encoding="utf-8") as f:
             metricas = json.load(f)
-            errores = metricas.get("indices_error", [])
-    else:
-        # Calcular errores al vuelo
-        X_eval = X_test.astype(np.float32) / 255.0
-        preds = mod_entry["instancia"].predict(X_eval)
+            if "indices_error" in metricas:
+                errores = metricas.get("indices_error", [])
+
+    if errores is None:
+        preds = predecir_batch_modelo(mod_entry, X_test)
         errores = np.where(preds != y_test)[0].tolist()
 
     if not errores:
@@ -343,6 +484,86 @@ def siguiente_error():
     siguientes = [i for i in errores if i > actual]
     idx_error = siguientes[0] if siguientes else errores[0]
     return obtener_muestra(int(idx_error))
+
+
+@app.route("/api/entrenamiento")
+def obtener_datos_entrenamiento():
+    """Entrega historiales por época, métricas y galería de gráficas de modelos y repo."""
+    historiales = []
+    benchmarks = []
+    galeria = []
+
+    for m_id, entry in modelos_registrados.items():
+        dir_path = entry["dir_path"]
+        info = entry["info"]
+
+        hist_file = info.get("archivo_historial", "historial_epocas.json")
+        hist_path = os.path.join(dir_path, hist_file)
+        if os.path.exists(hist_path):
+            with open(hist_path, "r", encoding="utf-8") as f:
+                data_h = json.load(f)
+                data_h["model_id"] = m_id
+                historiales.append(data_h)
+
+        met_file = info.get("archivo_metricas")
+        met_path = os.path.join(dir_path, met_file) if met_file else None
+        if met_path and os.path.exists(met_path):
+            with open(met_path, "r", encoding="utf-8") as f:
+                data_m = json.load(f)
+                benchmarks.append({
+                    "model_id": m_id,
+                    "nombre": info.get("nombre", m_id),
+                    "accuracy_pct": info.get("accuracy_pct"),
+                    "metricas": data_m,
+                })
+
+        img_dir = os.path.join(dir_path, "img")
+        if os.path.isdir(img_dir):
+            for fname in sorted(os.listdir(img_dir)):
+                if fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                    galeria.append({
+                        "titulo": f"{info.get('nombre', m_id)} — {fname}",
+                        "url": f"/modelos-media/{m_id}/img/{fname}",
+                        "origen": m_id,
+                    })
+
+    repo_img_dir = os.path.join(ROOT_DIR, "img")
+    if os.path.isdir(repo_img_dir):
+        graficas_repo = [
+            "curva_aprendizaje_svc.png",
+            "curva_epocas_svm.png",
+            "matriz_confusion.png",
+            "histograma_distribucion.png",
+            "muestra_digitos.png",
+            "muestra_individual_1100.png",
+        ]
+        for fname in graficas_repo:
+            if os.path.exists(os.path.join(repo_img_dir, fname)):
+                galeria.append({
+                    "titulo": f"Fase 1 (SVM) — {fname}",
+                    "url": f"/repo-img/{fname}",
+                    "origen": "repo",
+                })
+
+    return jsonify({
+        "historiales": historiales,
+        "benchmarks": benchmarks,
+        "galeria": galeria,
+    })
+
+
+@app.route("/modelos-media/<model_id>/<path:subpath>")
+def servir_media_modelo(model_id, subpath):
+    dir_path = os.path.join(CARPETA_MODELOS, model_id)
+    if not os.path.isdir(dir_path):
+        return jsonify({"error": "Modelo no encontrado."}), 404
+    return send_from_directory(dir_path, subpath)
+
+
+@app.route("/repo-img/<path:filename>")
+def servir_img_repo(filename):
+    repo_img_dir = os.path.join(ROOT_DIR, "img")
+    return send_from_directory(repo_img_dir, filename)
 
 
 # Inicializar automáticamente al importar o ejecutar

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DetectIA</string>
     <string name="header_title">DetectIA</string>
-    <string name="header_subtitle" formatted="false">SVM Lineal One-vs-One • 45 clasificadores</string>
+    <string name="header_subtitle" formatted="false">Red Neuronal CNN • ONNX Offline</string>
     <string name="canvas_hint">Dibuja un dígito del 0 al 9</string>
     <string name="btn_clear">Limpiar</string>
     <string name="btn_predict">Predecir Número</string>
@@ -10,8 +10,8 @@
     <string name="label_latency">Tiempo</string>
     <string name="label_preview_28">Vista IA\n28×28</string>
     <string name="label_top3">Top 3 probabilidades (Softmax)</string>
-    <string name="msg_loading_model">Cargando modelo SVM…</string>
-    <string name="msg_model_ready">Modelo SVM listo</string>
+    <string name="msg_loading_model">Cargando modelo CNN…</string>
+    <string name="msg_model_ready">Modelo CNN listo</string>
     <string name="msg_empty_canvas">Dibuja un número en el lienzo antes de predecir.</string>
     <string name="placeholder_dash">—</string>
 </resources>

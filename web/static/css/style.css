@@ -810,3 +810,131 @@ canvas#datasetCanvas {
   font-weight: 500;
   display: none;
 }
+
+/* --- VOTACIÓN DEL JURADO (ENSEMBLE) --- */
+.jury-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.jury-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+
+.jury-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.jury-chip {
+  font-size: 0.76rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.jury-chip.winner {
+  border-color: var(--primary);
+  background: var(--surface-pill);
+  color: var(--on-surface-pill);
+  font-weight: 600;
+}
+
+/* --- PESTAÑA ÉPOCAS Y GRÁFICAS --- */
+.training-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.epoch-canvas-wrap {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.epoch-canvas-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.epoch-canvas-wrap canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.training-empty {
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 0.88rem;
+}
+
+.benchmarks-wrap {
+  overflow-x: auto;
+}
+
+.benchmarks-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.benchmarks-table th,
+.benchmarks-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.benchmarks-table th {
+  color: var(--text-2);
+  font-weight: 600;
+  background: var(--surface-2);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.gallery-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.gallery-card-title {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  font-weight: 500;
+}

@@ -1,0 +1,23 @@
+{
+  "modelo": "CNN Residual (PyTorch -> ONNX)",
+  "total_pool_entrenamiento": 350000,
+  "tiempo_entrenamiento_seg": 3783.61,
+  "mejor_epoca": 23,
+  "mejor_val_acc": 99.85,
+  "benchmarks": {
+    "MNIST Test (10k)": {
+      "muestras": 10000,
+      "aciertos": 9984,
+      "errores": 16,
+      "accuracy_pct": 99.84,
+      "tiempo_seg": 0.45
+    },
+    "EMNIST Test (40k)": {
+      "muestras": 40000,
+      "aciertos": 39944,
+      "errores": 56,
+      "accuracy_pct": 99.86,
+      "tiempo_seg": 1.69
+    }
+  }
+}

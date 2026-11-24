@@ -1,0 +1,207 @@
+{
+  "modelo": "DetectIA CNN Residual",
+  "mejor_epoca": 23,
+  "mejor_val_acc": 99.85,
+  "epocas": [
+    {
+      "epoca": 1,
+      "train_loss": 0.39072,
+      "val_loss": 0.16644,
+      "train_acc": 93.02,
+      "val_acc": 99.2629,
+      "lr": 0.000245
+    },
+    {
+      "epoca": 2,
+      "train_loss": 0.18473,
+      "val_loss": 0.16145,
+      "train_acc": 98.8168,
+      "val_acc": 99.3114,
+      "lr": 0.000597
+    },
+    {
+      "epoca": 3,
+      "train_loss": 0.17364,
+      "val_loss": 0.15089,
+      "train_acc": 99.0292,
+      "val_acc": 99.4714,
+      "lr": 0.001115
+    },
+    {
+      "epoca": 4,
+      "train_loss": 0.16683,
+      "val_loss": 0.15095,
+      "train_acc": 99.1641,
+      "val_acc": 99.4571,
+      "lr": 0.001711
+    },
+    {
+      "epoca": 5,
+      "train_loss": 0.16195,
+      "val_loss": 0.14808,
+      "train_acc": 99.2603,
+      "val_acc": 99.5143,
+      "lr": 0.00228
+    },
+    {
+      "epoca": 6,
+      "train_loss": 0.15914,
+      "val_loss": 0.14429,
+      "train_acc": 99.2975,
+      "val_acc": 99.5629,
+      "lr": 0.002725
+    },
+    {
+      "epoca": 7,
+      "train_loss": 0.15705,
+      "val_loss": 0.14517,
+      "train_acc": 99.3486,
+      "val_acc": 99.5686,
+      "lr": 0.002969
+    },
+    {
+      "epoca": 8,
+      "train_loss": 0.15408,
+      "val_loss": 0.14272,
+      "train_acc": 99.4,
+      "val_acc": 99.6457,
+      "lr": 0.002994
+    },
+    {
+      "epoca": 9,
+      "train_loss": 0.15267,
+      "val_loss": 0.14211,
+      "train_acc": 99.4556,
+      "val_acc": 99.66,
+      "lr": 0.002946
+    },
+    {
+      "epoca": 10,
+      "train_loss": 0.15085,
+      "val_loss": 0.14101,
+      "train_acc": 99.4797,
+      "val_acc": 99.68,
+      "lr": 0.002851
+    },
+    {
+      "epoca": 11,
+      "train_loss": 0.14987,
+      "val_loss": 0.14039,
+      "train_acc": 99.501,
+      "val_acc": 99.6657,
+      "lr": 0.002713
+    },
+    {
+      "epoca": 12,
+      "train_loss": 0.14808,
+      "val_loss": 0.13958,
+      "train_acc": 99.554,
+      "val_acc": 99.7343,
+      "lr": 0.002536
+    },
+    {
+      "epoca": 13,
+      "train_loss": 0.14724,
+      "val_loss": 0.1381,
+      "train_acc": 99.5708,
+      "val_acc": 99.7543,
+      "lr": 0.002326
+    },
+    {
+      "epoca": 14,
+      "train_loss": 0.1461,
+      "val_loss": 0.13851,
+      "train_acc": 99.6117,
+      "val_acc": 99.7486,
+      "lr": 0.002089
+    },
+    {
+      "epoca": 15,
+      "train_loss": 0.14518,
+      "val_loss": 0.13835,
+      "train_acc": 99.6327,
+      "val_acc": 99.7514,
+      "lr": 0.001834
+    },
+    {
+      "epoca": 16,
+      "train_loss": 0.14428,
+      "val_loss": 0.13757,
+      "train_acc": 99.6429,
+      "val_acc": 99.7914,
+      "lr": 0.001567
+    },
+    {
+      "epoca": 17,
+      "train_loss": 0.14359,
+      "val_loss": 0.137,
+      "train_acc": 99.6679,
+      "val_acc": 99.7886,
+      "lr": 0.001298
+    },
+    {
+      "epoca": 18,
+      "train_loss": 0.14264,
+      "val_loss": 0.13695,
+      "train_acc": 99.6933,
+      "val_acc": 99.7914,
+      "lr": 0.001036
+    },
+    {
+      "epoca": 19,
+      "train_loss": 0.14169,
+      "val_loss": 0.13656,
+      "train_acc": 99.7289,
+      "val_acc": 99.8143,
+      "lr": 0.000789
+    },
+    {
+      "epoca": 20,
+      "train_loss": 0.14114,
+      "val_loss": 0.1361,
+      "train_acc": 99.7438,
+      "val_acc": 99.8343,
+      "lr": 0.000565
+    },
+    {
+      "epoca": 21,
+      "train_loss": 0.14057,
+      "val_loss": 0.13602,
+      "train_acc": 99.7546,
+      "val_acc": 99.8086,
+      "lr": 0.00037
+    },
+    {
+      "epoca": 22,
+      "train_loss": 0.14011,
+      "val_loss": 0.13583,
+      "train_acc": 99.7717,
+      "val_acc": 99.8257,
+      "lr": 0.000212
+    },
+    {
+      "epoca": 23,
+      "train_loss": 0.13994,
+      "val_loss": 0.13557,
+      "train_acc": 99.7724,
+      "val_acc": 99.8486,
+      "lr": 9.6e-05
+    },
+    {
+      "epoca": 24,
+      "train_loss": 0.13937,
+      "val_loss": 0.13548,
+      "train_acc": 99.7946,
+      "val_acc": 99.84,
+      "lr": 2.4e-05
+    },
+    {
+      "epoca": 25,
+      "train_loss": 0.13922,
+      "val_loss": 0.13548,
+      "train_acc": 99.801,
+      "val_acc": 99.8343,
+      "lr": 0.0
+    }
+  ]
+}

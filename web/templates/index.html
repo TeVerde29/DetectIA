@@ -46,6 +46,10 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <span>Explorador de dataset ({{ resumen.total_prueba }})</span>
       </button>
+      <button type="button" class="tab-btn" id="tabBtnTraining" onclick="cambiarPestana('training')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M3 17h18v2H3v-2zm0-7h4v5H3v-5zm6-4h4v9H9V6zm6 2h4v7h-4V8z"/></svg>
+        <span>Épocas y Gráficas</span>
+      </button>
     </nav>
 
     <!-- SELECTOR DE MODELO / SUBHEADER ESTILO TRANSLATE CON INDICADOR SUBRAYADO -->
@@ -55,7 +59,7 @@
       </div>
       <div class="model-chips-group" id="modelChipsContainer">
         <button type="button" class="model-chip-btn active" data-model="ambos" onclick="seleccionarModoModelo('ambos')">
-          <span>Modo Dúo (Comparar Ambos)</span>
+          <span>Comparar Todos</span>
         </button>
         {% for m in modelos %}
         <button type="button" class="model-chip-btn" data-model="{{ m.id }}" onclick="seleccionarModoModelo('{{ m.id }}')">
@@ -214,6 +218,49 @@
           </div>
         </section>
       </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- PESTAÑA 3: ÉPOCAS, BENCHMARKS Y GALERÍA DE GRÁFICAS                   -->
+    <!-- ===================================================================== -->
+    <main class="tab-content" id="viewTraining">
+      <section class="card" style="margin-bottom: 18px;">
+        <div class="card-header">
+          <h2 class="card-title">Curvas de Entrenamiento por Época (Train vs. Validación)</h2>
+          <span class="chip" id="trainingModelsChip">Cargando...</span>
+        </div>
+        <div id="epochsChartsContainer">
+          <div class="training-empty" id="epochsEmptyMsg">
+            Aún no hay historial de épocas (`historial_epocas.json`) en `modelos/`. Ejecuta el notebook de Fase 2 en Colab y coloca los artefactos en `modelos/cnn/` para ver las curvas interactivas aquí.
+          </div>
+          <div class="training-grid" id="epochsGrid" style="display:none;">
+            <div class="epoch-canvas-wrap">
+              <div class="epoch-canvas-title">Exactitud por Época (%)</div>
+              <canvas id="epochAccCanvas" width="500" height="230"></canvas>
+            </div>
+            <div class="epoch-canvas-wrap">
+              <div class="epoch-canvas-title">Pérdida por Época (Loss)</div>
+              <canvas id="epochLossCanvas" width="500" height="230"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-bottom: 18px;">
+        <div class="card-header">
+          <h2 class="card-title">Benchmarks y Métricas Registradas</h2>
+          <span class="chip">Evaluación</span>
+        </div>
+        <div id="benchmarksContainer" class="benchmarks-wrap"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">Galería de Gráficas Exportadas (Fase 1 y Fase 2)</h2>
+          <span class="chip" id="galleryCountChip">0 gráficos</span>
+        </div>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </section>
     </main>
   </div>
 
